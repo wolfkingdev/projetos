@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Piano Elegant</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --piano-body: #0a0a0a;
+            --white-key-base: #f0f0f0;
+            --black-key-base: #1a1a1a;
+            --active-glow: rgba(255, 255, 255, 0.8);
+            --accent-color: #00d2ff; /* Cor do brilho ao tocar */
+        }
+
+        * {
+            box-sizing: border-box;
+            touch-action: none; /* Melhora resposta no mobile */
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: radial-gradient(circle at center, #2b2b2b 0%, #000000 100%);
+            font-family: 'Helvetica Neue', sans-serif;
+            overflow: hidden;
+        }
+
+        /* Container Principal do Piano */
+        .piano-wrapper {
+            position: relative;
+            background: var(--piano-body);
+            padding: 40px 20px 20px 20px;
+            border-radius: 20px;
+            box-shadow: 
+                0 30px 60px rgba(0,0,0,0.8),
+                inset 0 1px 1px rgba(255,255,255,0.1);
+            border: 1px solid #333;
+        }
+
+        /* Marca d'água elegante */
+        .brand {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #444;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            pointer-events: none;
+        }
+
+        .keys-container {
+            display: flex;
+            position: relative;
+            height: 280px;
+        }
+
+        /* --- TECLAS BRANCAS --- */
+        .key-white {
+            width: 60px;
+            height: 100%;
+            background: linear-gradient(to bottom, #fff 0%, #e6e6e6 100%);
+            border-radius: 0 0 8px 8px;
+            margin: 0 3px;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 
+                0 5px 10px rgba(0,0,0,0.3),
+                inset 0 -5px 10px rgba(0,0,0,0.1);
+            transition: transform 0.05s ease, box-shadow 0.05s ease;
+            z-index: 1;
+        }
+
+        .key-white:active, .key-white.active {
+            transform: translateY(4px) scale(0.98);
+            background: linear-gradient(to bottom, #fff 0%, #ddd 100%);
+            box-shadow: 
+                0 2px 5px rgba(0,0,0,0.3),
+                inset 0 -2px 5px rgba(0,0,0,0.2);
+            border-bottom: 4px solid var(--accent-color); /* Detalhe colorido ao tocar */
+        }
+
+        /* --- TECLAS PRETAS --- */
+        .key-black {
+            width: 40px;
+            height: 65%;
+            background: linear-gradient(to bottom, #333 0%, #000 100%);
+            position: absolute;
+            top: 0;
+            border-radius: 0 0 6px 6px;
+            z-index: 2;
+            cursor: pointer;
+            box-shadow: 
+                2px 5px 10px rgba(0,0,0,0.5),
+                inset 0 2px 5px rgba(255,255,255,0.2);
+            transition: transform 0.05s ease;
+        }
+
+        .key-black:active, .key-black.active {
+            transform: translateY(4px) scale(0.98);
+            background: linear-gradient(to bottom, #222 0%, #000 100%);
+            box-shadow: 
+                1px 2px 5px rgba(0,0,0,0.5),
+                inset 0 2px 5px rgba(255,255,255,0.1);
+            border-bottom: 3px solid var(--accent-color);
+        }
+
+        /* Indicador de tecla do teclado (PC) */
+        .key-hint {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ccc;
+            font-size: 10px;
+            font-weight: bold;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        
+        .key-black .key-hint {
+            bottom: 10px;
+            color: #666;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .piano-wrapper {
+                width: 95vw;
+                padding: 30px 10px 10px 10px;
+                border-radius: 10px;
+            }
+            .keys-container {
+                height: 200px; /* Menor altura no mobile */
+            }
+            .key-white {
+                width: 11vw; /* Ajuste flexível */
+                margin: 0 1px;
+            }
+            .key-black {
+                width: 7vw;
+            }
+            .key-hint {
+                display: none; /* Esconde letras no mobile para limpar visual */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="piano-wrapper">
+        <div class="brand">STEINWEB & SONS</div>
+        <div class="keys-container" id="piano">
+            <!-- Teclas geradas via JS -->
+        </div>
+    </div>
+
+    <script>
+        // Configuração de Áudio de Alta Qualidade
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AudioContext();
+
+        // Notas e Frequências (2 Oitavas para ficar bonito)
+        const notesConfig = [
+            { note: 'C',  freq: 261.63, type: 'white', key: 'a' },
+            { note: 'C#', freq: 277.18, type: 'black', key: 'w' },
+            { note: 'D',  freq: 293.66, type: 'white', key: 's' },
+            { note: 'D#', freq: 311.13, type: 'black', key: 'e' },
+            { note: 'E',  freq: 329.63, type: 'white', key: 'd' },
+            { note: 'F',  freq: 349.23, type: 'white', key: 'f' },
+            { note: 'F#', freq: 369.99, type: 'black', key: 't' },
+            { note: 'G',  freq: 392.00, type: 'white', key: 'g' },
+            { note: 'G#', freq: 415.30, type: 'black', key: 'y' },
+            { note: 'A',  freq: 440.00, type: 'white', key: 'h' },
+            { note: 'A#', freq: 466.16, type: 'black', key: 'u' },
+            { note: 'B',  freq: 493.88, type: 'white', key: 'j' },
+            { note: 'C2', freq: 523.25, type: 'white', key: 'k' },
+            { note: 'C#2',freq: 554.37, type: 'black', key: 'o' },
+            { note: 'D2', freq: 587.33, type: 'white', key: 'l' }
+        ];
+
+        const container = document.getElementById('piano');
+
+        // Função de Som (Sintetizador Polifônico)
+        function playTone(freq) {
+            if (ctx.state === 'suspended') ctx.resume();
+
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            
+            // Som mais rico usando 2 osciladores levemente desafinados (efeito chorus)
+            const osc2 = ctx.createOscillator();
+            const gain2 = ctx.createGain();
+
+            osc.type = 'sine'; // Base suave
+            osc2.type = 'triangle'; // Harmônicos
+            
+            osc.frequency.value = freq;
+            osc2.frequency.value = freq;
+            osc2.detune.value = 5; // Leve desafinação para "corpo"
+
+            // Envelope profissional (Attack, Decay, Sustain, Release)
+            const now = ctx.currentTime;
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(0.5, now + 0.02); // Attack rápido
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5); // Decay longo
+
+            gain2.gain.setValueAtTime(0, now);
+            gain2.gain.linearRampToValueAtTime(0.2, now + 0.02);
+            gain2.gain.exponentialRampToValueAtTime(0.001, now + 1.0);
+
+            osc.connect(gain);
+            osc2.connect(gain2);
+            gain.connect(ctx.destination);
+            gain2.connect(ctx.destination);
+
+            osc.start(now);
+            osc2.start(now);
+            osc.stop(now + 1.5);
+            osc2.stop(now + 1.5);
+        }
+
+        // Gerar Teclas
+        notesConfig.forEach((n, index) => {
+            const key = document.createElement('div');
+            
+            if (n.type === 'white') {
+                key.className = 'key-white';
+                // Adicionar label da tecla do PC
+                const hint = document.createElement('span');
+                hint.className = 'key-hint';
+                hint.innerText = n.key.toUpperCase();
+                key.appendChild(hint);
+            } else {
+                key.className = 'key-black';
+                // Posicionamento manual das pretas baseado na lógica visual
+                // A tecla preta fica entre a branca atual e a próxima
+                // Vamos usar left absoluto baseado no índice das brancas
+                // Mas como estamos iterando a lista mista, precisamos calcular
+            }
+
+            key.dataset.note = n.note;
+            
+            // Evento de toque/clique
+            const trigger = (e) => {
+                e.preventDefault();
+                playTone(n.freq);
+                key.classList.add('active');
+                setTimeout(() => key.classList.remove('active'), 150);
+            };
+
+            key.addEventListener('mousedown', trigger);
+            key.addEventListener('touchstart', trigger);
+
+            container.appendChild(key);
+        });
+
+        // Ajuste fino de posição das teclas pretas
+        // Isso é necessário porque HTML flow não lida bem com teclas sobrepostas nativamente
+        const whiteKeys = Array.from(document.querySelectorAll('.key-white'));
+        const blackKeys = Array.from(document.querySelectorAll('.key-black'));
+        
+        // Mapeamento de onde as teclas pretas devem ficar (índice da tecla branca anterior)
+        // C# fica depois da 1ª branca (C), D# depois da 2ª (D), etc.
+        // A lista de notas tem brancas e pretas misturadas.
+        // Vamos recalcular baseado no DOM gerado.
+        
+        let whiteIndex = 0;
+        notesConfig.forEach((n) => {
+            if(n.type === 'white') {
+                whiteIndex++;
+            } else {
+                // É preta. Deve ficar entre a branca atual (whiteIndex) e a próxima
+                const currentWhite = whiteKeys[whiteIndex - 1]; // A branca antes dela
+                const nextWhite = whiteKeys[whiteIndex];        // A branca depois dela
+                
+                if(currentWhite && nextWhite) {
+                    const offsetLeft = currentWhite.offsetLeft + currentWhite.offsetWidth - 20; // 20 é metade da largura da preta (40px)
+                    const targetKey = document.querySelector(`.key-black[data-note="${n.note}"]`);
+                    if(targetKey) targetKey.style.left = `${offsetLeft}px`;
+                }
+            }
+        });
+
+        // Suporte a Teclado PC
+        document.addEventListener('keydown', (e) => {
+            if (e.repeat) return;
+            const keyChar = e.key.toLowerCase();
+            const noteData = notesConfig.find(n => n.key === keyChar);
+            
+            if (noteData) {
+                const keyEl = document.querySelector(`.key-${noteData.type}[data-note="${noteData.note}"]`);
+                if(keyEl) {
+                    playTone(noteData.freq);
+                    keyEl.classList.add('active');
+                }
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            const keyChar = e.key.toLowerCase();
+            const noteData = notesConfig.find(n => n.key === keyChar);
+            if (noteData) {
+                const keyEl = document.querySelector(`.key-${noteData.type}[data-note="${noteData.note}"]`);
+                if(keyEl) keyEl.classList.remove('active');
+            }
+        });
+
+    </script>
+</body>
+</html>
