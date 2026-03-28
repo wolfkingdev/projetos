@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Neon Card Master: Ultimate Edition</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap');
+
+        :root {
+            --bg-dark: #020205;
+            --bg-panel: rgba(20, 25, 40, 0.85);
+            --primary: #00f2ff;
+            --accent: #bd00ff;
+            --danger: #ff0055;
+            --success: #00ff9d;
+            --gold: #ffd700;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            
+            --rarity-normal: #94a3b8;
+            --rarity-rare: #38bdf8;
+            --rarity-super: #d946ef;
+            --rarity-legendary: #f59e0b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Rajdhani', sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background-color: var(--bg-dark); 
+            color: #e2e8f0; 
+            padding-bottom: 90px; 
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(189, 0, 255, 0.08) 0%, transparent 25%),
+                radial-gradient(circle at 90% 80%, rgba(0, 242, 255, 0.08) 0%, transparent 25%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- HEADER --- */
+        header {
+            background: rgba(2, 2, 5, 0.9);
+            backdrop-filter: blur(15px);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+        }
+
+        .brand { font-family: 'Orbitron', sans-serif; font-size: 1.3rem; font-weight: 900; background: linear-gradient(to right, var(--primary), var(--accent)); -webkit-background-clip: text; color: transparent; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 20px rgba(0, 242, 255, 0.3); }
+        
+        .stats-bar { display: flex; gap: 10px; }
+        .stat-box { 
+            background: var(--glass); 
+            padding: 6px 14px; 
+            border-radius: 8px; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            border: 1px solid var(--border);
+            font-weight: 700;
+            font-size: 0.95rem;
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+        }
+        .coin-text { color: var(--gold); text-shadow: 0 0 8px var(--gold); }
+
+        /* --- NAVIGATION --- */
+        nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(5, 5, 10, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0 15px 0;
+            border-top: 1px solid var(--border);
+            z-index: 100;
+            box-shadow: 0 -5px 30px rgba(0,0,0,0.8);
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: #475569;
+            font-size: 0.7rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            transition: 0.3s;
+            width: 60px;
+        }
+        .nav-btn span { font-size: 1.5rem; filter: grayscale(1); transition: 0.3s; }
+        .nav-btn.active { color: var(--primary); }
+        .nav-btn.active span { filter: grayscale(0); text-shadow: 0 0 15px var(--primary); transform: translateY(-5px); }
+
+        /* --- SECTIONS --- */
+        .section { display: none; padding: 20px; max-width: 600px; margin: 0 auto; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .section.active { display: block; }
+        
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        h2 { 
+            font-family: 'Orbitron', sans-serif; 
+            margin-bottom: 20px; 
+            font-size: 1.6rem; 
+            border-left: 5px solid var(--accent); 
+            padding-left: 15px; 
+            text-transform: uppercase;
+            text-shadow: 0 0 15px rgba(189, 0, 255, 0.4);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* --- CARDS DESIGN --- */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+
+        .card {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 250px;
+            cursor: pointer;
+        }
+
+        .card:active { transform: scale(0.95); }
+        
+        .card-bg-glow {
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .card:hover .card-bg-glow { opacity: 1; }
+
+        .card-header { position: relative; z-index: 2; margin-bottom: auto; }
+        .card-icon { font-size: 3.5rem; margin: 10px 0; display: block; filter: drop-shadow(0 0 10px rgba(255,255,255,0.2)); }
+        .card-name { font-weight: 700; font-size: 1rem; margin-bottom: 5px; text-transform: uppercase; line-height: 1.1; }
+        .card-power { font-size: 1.2rem; font-weight: 700; color: var(--gold); text-shadow: 0 0 8px rgba(251, 191, 36, 0.6); }
+        .card-rarity { font-size: 0.65rem; letter-spacing: 1px; margin-bottom: 5px; padding: 3px 8px; border-radius: 4px; display: inline-block; font-weight: bold; }
+
+        /* Rarity Borders */
+        .rarity-normal { border-bottom: 4px solid var(--rarity-normal); color: var(--rarity-normal); }
+        .rarity-rare { border-bottom: 4px solid var(--rarity-rare); color: var(--rarity-rare); box-shadow: inset 0 0 20px rgba(56, 189, 248, 0.1); }
+        .rarity-super { border-bottom: 4px solid var(--rarity-super); color: var(--rarity-super); background: linear-gradient(180deg, rgba(217, 70, 239, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%); }
+        .rarity-legendary { border-bottom: 4px solid var(--rarity-legendary); color: var(--rarity-legendary); box-shadow: 0 0 20px rgba(245, 158, 11, 0.3); animation: pulse 3s infinite; }
+
+        @keyframes pulse { 0% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); } 50% { box-shadow: 0 0 30px rgba(245, 158, 11, 0.6); } 100% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); } }
+
+        /* Buttons */
+        .btn {
+            width: 100%; padding: 12px; border: none; border-radius: 8px;
+            font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+            margin-top: 10px; transition: 0.2s; font-size: 0.85rem;
+            position: relative; overflow: hidden; z-index: 5;
+        }
+        .btn:active { transform: scale(0.95); }
+        
+        .btn-buy { background: var(--primary); color: #000; box-shadow: 0 0 15px rgba(0, 242, 255, 0.4); }
+        .btn-buy:hover { background: #fff; box-shadow: 0 0 25px var(--primary); }
+        
+        .btn-sell { background: var(--danger); color: white; box-shadow: 0 0 15px rgba(255, 0, 85, 0.4); }
+        .btn-sell:hover { background: #ff3377; box-shadow: 0 0 25px var(--danger); }
+        
+        .btn-action { background: var(--accent); color: white; font-size: 1.1rem; padding: 18px; box-shadow: 0 0 20px rgba(189, 0, 255, 0.5); }
+        .btn-action:hover { background: #d946ef; box-shadow: 0 0 35px var(--accent); }
+        .btn-action:disabled { background: #475569; cursor: not-allowed; box-shadow: none; opacity: 0.7; }
+
+        /* --- SHOP SPECIFIC --- */
+        .market-timer { 
+            background: rgba(0,0,0,0.4); 
+            padding: 15px; 
+            border-radius: 10px; 
+            text-align: center; 
+            margin-bottom: 20px; 
+            font-weight: bold; 
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .timer-val { color: var(--primary); font-family: 'Orbitron', monospace; font-size: 1.3rem; }
+        
+        .shop-split { display: flex; flex-direction: column; gap: 30px; }
+        .shop-section-title { font-size: 1.2rem; color: #94a3b8; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+
+        /* --- MINING --- */
+        .mining-container { text-align: center; padding: 50px 20px; background: rgba(0,0,0,0.4); border-radius: 20px; border: 1px solid var(--border); backdrop-filter: blur(5px); margin-bottom: 20px; }
+        .mining-icon { font-size: 6rem; margin-bottom: 20px; animation: float 3s ease-in-out infinite; filter: drop-shadow(0 0 30px var(--success)); }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-20px); } 100% { transform: translateY(0px); } }
+
+        /* --- BATTLE --- */
+        .battle-arena { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; position: relative; min-height: 280px; perspective: 1000px; }
+        .battle-card-slot { width: 45%; text-align: center; }
+        .vs-badge { font-size: 3rem; font-weight: 900; color: var(--danger); text-shadow: 0 0 30px var(--danger); z-index: 2; font-family: 'Orbitron'; }
+        
+        .battle-log { 
+            margin-top: 20px; 
+            background: rgba(0,0,0,0.6); 
+            padding: 15px; 
+            border-radius: 10px; 
+            font-family: 'Courier New', monospace; 
+            font-size: 0.9rem; 
+            height: 150px; 
+            overflow-y: auto; 
+            border: 1px solid var(--border); 
+            color: #cbd5e1;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+        }
+        .log-entry { margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
+        .log-win { color: var(--success); text-shadow: 0 0 5px var(--success); }
+        .log-lose { color: var(--danger); text-shadow: 0 0 5px var(--danger); }
+
+        /* --- MODAL --- */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); backdrop-filter: blur(10px);
+            justify-content: center; align-items: center; z-index: 200;
+        }
+        .modal-content {
+            background: #1e293b; padding: 40px; border-radius: 25px; text-align: center;
+            max-width: 90%; width: 450px; border: 2px solid var(--accent);
+            box-shadow: 0 0 60px rgba(189, 0, 255, 0.3);
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .dilemma-box { margin: 30px 0; font-size: 1.6rem; font-weight: bold; color: #fff; font-family: 'Orbitron'; line-height: 1.4; }
+        .input-field { width: 100%; padding: 18px; background: #0f172a; border: 2px solid #334155; color: white; border-radius: 12px; font-size: 1.8rem; text-align: center; margin-bottom: 20px; font-family: 'Orbitron'; }
+        .input-field:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 20px rgba(0, 242, 255, 0.3); }
+
+        /* --- NOTIFICATION --- */
+        #toast-container { position: fixed; top: 90px; right: 20px; z-index: 300; display: flex; flex-direction: column; gap: 12px; pointer-events: none; max-width: 350px; }
+        .toast { 
+            background: rgba(15, 23, 42, 0.95); 
+            color: white; 
+            padding: 18px 25px; 
+            border-radius: 12px; 
+            border-left: 6px solid var(--primary); 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6); 
+            animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            backdrop-filter: blur(5px);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* --- ALBUM --- */
+        .album-card.locked { filter: grayscale(1) brightness(0.3); opacity: 0.5; }
+        .album-card.locked .card-icon::after { content: '?'; font-size: 3.5rem; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; }
+        .album-card.locked .card-name, .album-card.locked .card-power { visibility: hidden; }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="brand">NEON CARDS <span style="font-size:0.7rem; vertical-align: super; color:var(--primary)">ULTIMATE</span></div>
+    <div class="stats-bar">
+        <div class="stat-box"><span class="coin-text">💰</span> <span id="coin-display">0</span></div>
+        <div class="stat-box"><span>📦</span> <span id="inventory-count">0</span></div>
+    </div>
+</header>
+
+<!-- HOME -->
+<div id="home" class="section active">
+    <h2>Painel de Controle</h2>
+    <div style="background: linear-gradient(135deg, rgba(0, 242, 255, 0.1), rgba(189, 0, 255, 0.1)); padding: 30px; border-radius: 20px; margin-bottom: 30px; color: white; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+        <h3 style="font-family: 'Orbitron'; margin-bottom: 15px; font-size: 1.4rem;">Bem-vindo, Colecionador.</h3>
+        <p style="opacity: 0.9; line-height: 1.6; margin-bottom: 20px;">O mercado está volátil. Minere com cuidado e aposte com sabedoria. Seus dados são salvos automaticamente.</p>
+        <div style="font-size: 0.85rem; color: var(--primary); border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+            <button class="btn btn-sell" style="width: auto; padding: 8px 20px; font-size: 0.8rem;" onclick="resetGame()">⚠️ Resetar Save</button>
+        </div>
+    </div>
+    
+    <div class="grid">
+        <div class="card" onclick="showSection('shop')" style="cursor: pointer; border-color: var(--primary);">
+            <div class="card-bg-glow"></div>
+            <span class="card-icon">🏪</span>
+            <div class="card-name">Mercado</div>
+            <div style="font-size: 0.9rem; color: #94a3b8;">Compre e Venda</div>
+        </div>
+        <div class="card" onclick="showSection('mine')" style="cursor: pointer; border-color: var(--success);">
+            <div class="card-bg-glow"></div>
+            <span class="card-icon">⛏️</span>
+            <div class="card-name">Mineração</div>
+            <div style="font-size: 0.9rem; color: #94a3b8;">Risco Alto</div>
+        </div>
+        <div class="card" onclick="showSection('battle')" style="cursor: pointer; border-color: var(--danger);">
+            <div class="card-bg-glow"></div>
+            <span class="card-icon">⚔️</span>
+            <div class="card-name">Arena</div>
+            <div style="font-size:0.9rem; color: #94a3b8;">PvP vs IA</div>
+        </div>
+    </div>
+</div>
+
+<!-- SHOP -->
+<div id="shop" class="section">
+    <h2>Mercado Negro</h2>
+    <div class="market-timer">
+        <span>Próxima atualização:</span>
+        <span id="market-timer" class="timer-val">30</span>s
+    </div>
+
+    <div class="shop-split">
+        <!-- Minha Coleção (Venda) -->
+        <div>
+            <div class="shop-section-title">
+                <span>Minha Coleção</span>
+                <span style="font-size: 0.8rem; color: var(--danger)">Venda Rápida</span>
+            </div>
+            <div id="my-cards-grid" class="grid"></div>
+            <p id="no-cards-msg" style="text-align: center; color: #64748b; margin-top: 20px; font-style: italic; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 10px;">Seu inventário está vazio. Vá minerar ou compre cartas!</p>
+        </div>
+
+        <!-- Loja (Compra) -->
+        <div>
+            <div class="shop-section-title">
+                <span>Disponíveis</span>
+                <span style="font-size: 0.8rem; color: var(--primary)">Preços Dinâmicos</span>
+            </div>
+            <div id="shop-grid" class="grid"></div>
+        </div>
+    </div>
+</div>
+
+<!-- MINE -->
+<div id="mine" class="section">
+    <h2>Mineração Profunda</h2>
+    <div class="mining-container">
+        <div class="mining-icon">💎</div>
+        <p style="margin-bottom: 30px; color: #94a3b8; line-height: 1.6; font-size: 1.1rem;">Resolva o enigma de segurança para ativar o scanner quântico.<br><strong>Aviso:</strong> Falhar no enigma ou ter azar no scanner resulta em perda de recursos.</p>
+        <button class="btn btn-action" onclick="startMining()">INICIAR PROTOCOLO</button>
+    </div>
+    <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 15px;">
+        <h3 style="font-size: 1.1rem; color: var(--primary); margin-bottom: 15px; font-family: 'Orbitron'">Probabilidades do Scanner</h3>
+        
+        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px;"><span>Comum</span> <span>65%</span></div>
+        <div style="width: 100%; height: 6px; background: #333; border-radius: 3px; margin-bottom: 15px;"><div style="width: 65%; height: 100%; background: var(--rarity-normal); border-radius: 3px; box-shadow: 0 0 10px var(--rarity-normal);"></div></div>
+        
+        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px;"><span>Rara</span> <span>25%</span></div>
+        <div style="width: 100%; height: 6px; background: #333; border-radius: 3px; margin-bottom: 15px;"><div style="width: 25%; height: 100%; background: var(--rarity-rare); border-radius: 3px; box-shadow: 0 0 10px var(--rarity-rare);"></div></div>
+
+        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px;"><span>Épica</span> <span>8%</span></div>
+        <div style="width: 100%; height: 6px; background: #333; border-radius: 3px; margin-bottom: 15px;"><div style="width: 8%; height: 100%; background: var(--rarity-super); border-radius: 3px; box-shadow: 0 0 10px var(--rarity-super);"></div></div>
+
+        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px;"><span>Lendária</span> <span>2%</span></div>
+        <div style="width: 100%; height: 6px; background: #333; border-radius: 3px;"><div style="width: 2%; height: 100%; background: var(--rarity-legendary); border-radius: 3px; box-shadow: 0 0 10px var(--rarity-legendary);"></div></div>
+    </div>
+</div>
+
+<!-- BATTLE -->
+<div id="battle" class="section">
+    <h2>Arena de Combate</h2>
+    
+    <div style="background: rgba(30, 41, 59, 0.5); padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 1px solid var(--border);">
+        <label style="display: block; margin-bottom: 10px; color: #94a3b8; font-size: 1rem;">Definir Aposta (Mínimo 10):</label>
+        <div style="display: flex; gap: 10px;">
+            <input type="number" id="bet-amount" class="input-field" style="margin: 0; font-size: 1.3rem;" value="50">
+            <button class="btn btn-buy" style="width: auto;" onclick="setBet(50)">50</button>
+            <button class="btn btn-buy" style="width: auto;" onclick="setBet(100)">100</button>
+            <button class="btn btn-buy" style="width: auto;" onclick="setBet('ALL')">ALL</button>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <label style="display: block; margin-bottom: 10px; color: #94a3b8; font-size: 1rem;">Escolha seu Lutador:</label>
+        <select id="battle-card-select" class="input-field" style="text-align: left; cursor: pointer;">
+            <option value="">Selecione uma carta...</option>
+        </select>
+    </div>
+
+    <button id="btn-fight" class="btn btn-action" onclick="startBattle()">⚔️ ENTRAR NA ARENA</button>
+
+    <div class="battle-arena" id="arena-display" style="display: none; opacity: 0; transition: opacity 0.5s;">
+        <div class="battle-card-slot" id="player-battle-card"></div>
+        <div class="vs-badge">VS</div>
+        <div class="battle-card-slot" id="ai-battle-card"></div>
+    </div>
+
+    <div class="battle-log" id="battle-log"></div>
+</div>
+
+<!-- ALBUM -->
+<div id="album" class="section">
+    <h2>Álbum de Cartas</h2>
+    <p style="margin-bottom: 20px; color: #94a3b8; font-size: 1rem;">Complete a coleção para desbloquear o prestígio máximo.</p>
+    <div id="album-grid" class="grid"></div>
+</div>
+
+<!-- MINING MODAL -->
+<div id="mining-modal" class="modal">
+    <div class="modal-content">
+        <h3 style="color: var(--accent); margin-bottom: 20px; font-family: 'Orbitron'; font-size: 1.5rem;">ENIGMA DE SEGURANÇA</h3>
+        <div class="dilemma-box" id="dilemma-question">Carregando...</div>
+        <input type="number" id="dilemma-answer" class="input-field" placeholder="?">
+        <button class="btn btn-action" onclick="checkDilemma()">DESBLOQUEAR</button>
+        <button class="btn btn-sell" style="margin-top: 15px;" onclick="closeMining()">CANCELAR</button>
+    </div>
+</div>
+
+<div id="toast-container"></div>
+
+<!-- NAVIGATION BAR -->
+<nav>
+    <button class="nav-btn active" onclick="showSection('home')">
+        <span>🏠</span> Início
+    </button>
+    <button class="nav-btn" onclick="showSection('shop')">
+        <span>🏪</span> Mercado
+    </button>
+    <button class="nav-btn" onclick="showSection('mine')">
+        <span>⛏️</span> Minerar
+    </button>
+    <button class="nav-btn" onclick="showSection('battle')">
+        <span>⚔️</span> Batalha
+    </button>
+    <button class="nav-btn" onclick="showSection('album')">
+        <span>📚</span> Álbum
+    </button>
+</nav>
+
+<script>
+    // --- AUDIO SYSTEM (Synth) ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playSound(type) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+
+        if (type === 'click') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, now);
+            osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
+            gainNode.gain.setValueAtTime(0.1, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+            osc.start(now);
+            osc.stop(now + 0.1);
+        } else if (type === 'buy') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(400, now);
+            osc.frequency.linearRampToValueAtTime(800, now + 0.15);
+            gainNode.gain.setValueAtTime(0.1, now);
+            gainNode.gain.linearRampToValueAtTime(0, now + 0.2);
+            osc.start(now);
+            osc.stop(now + 0.2);
+        } else if (type === 'sell') {
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(300, now);
+            osc.frequency.linearRampToValueAtTime(150, now + 0.15);
+            gainNode.gain.setValueAtTime(0.05, now);
+            gainNode.gain.linearRampToValueAtTime(0, now + 0.2);
+            osc.start(now);
+            osc.stop(now + 0.2);
+        } else if (type === 'win') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(500, now);
+            osc.frequency.setValueAtTime(800, now + 0.1);
+            osc.frequency.setValueAtTime(1200, now + 0.2);
+            gainNode.gain.setValueAtTime(0.1, now);
+            gainNode.gain.linearRampToValueAtTime(0, now + 0.6);
+            osc.start(now);
+            osc.stop(now + 0.6);
+        } else if (type === 'lose') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(200, now);
+            osc.frequency.linearRampToValueAtTime(80, now + 0.4);
+            gainNode.gain.setValueAtTime(0.1, now);
+            gainNode.gain.linearRampToValueAtTime(0, now + 0.4);
+            osc.start(now);
+            osc.stop(now + 0.4);
+        } else if (type === 'rare') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(400, now);
+            osc.frequency.linearRampToValueAtTime(1200, now + 0.6);
+            gainNode.gain.setValueAtTime(0.1, now);
+            gainNode.gain.linearRampToValueAtTime(0, now + 0.6);
+            osc.start(now);
+            osc.stop(now + 0.6);
+        }
+    }
+
+    // --- DATA ---
+    const RARITY = {
+        NORMAL: { name: 'Comum', class: 'rarity-normal', chance: 0.65, basePrice: 20 },
+        RARE: { name: 'Rara', class: 'rarity-rare', chance: 0.25, basePrice: 80 },
+        SUPER: { name: 'Épica', class: 'rarity-super', chance: 0.08, basePrice: 250 },
+        LEGENDARY: { name: 'Lendária', class: 'rarity-legendary', chance: 0.02, basePrice: 1000 }
+    };
+
+    const CARD_DB = [
+        { id: 1, name: "Recruta", icon: "👶", power: 10, type: RARITY.NORMAL },
+        { id: 2, name: "Goblin", icon: "👺", power: 15, type: RARITY.NORMAL },
+        { id: 3, name: "Arqueiro", icon: "🏹", power: 20, type: RARITY.NORMAL },
+        { id: 4, name: "Escudeiro", icon: "🛡️", power: 25, type: RARITY.NORMAL },
+        { id: 5, name: "Lobo", icon: "🐺", power: 30, type: RARITY.NORMAL },
+        { id: 6, name: "Mago Iniciante", icon: "🧙‍♂️", power: 35, type: RARITY.NORMAL },
+        { id: 7, name: "Cavaleiro", icon: "⚔️", power: 50, type: RARITY.RARE },
+        { id: 8, name: "Bruxa", icon: "🧙‍♀️", power: 55, type: RARITY.RARE },
+        { id: 9, name: "Golem", icon: "🗿", power: 60, type: RARITY.RARE },
+        { id: 10, name: "Vampiro", icon: "🧛", power: 65, type: RARITY.RARE },
+        { id: 11, name: "Dragão Bebê", icon: "🐲", power: 70, type: RARITY.RARE },
+        { id: 12, name: "General", icon: "🎖️", power: 85, type: RARITY.SUPER },
+        { id: 13, name: "Necromante", icon: "💀", power: 90, type: RARITY.SUPER },
+        { id: 14, name: "Fênix", icon: "🦅", power: 95, type: RARITY.SUPER },
+        { id: 15, name: "Cyborg", icon: "🤖", power: 100, type: RARITY.SUPER },
+        { id: 16, name: "Rei Demônio", icon: "👹", power: 150, type: RARITY.LEGENDARY },
+        { id: 17, name: "Anjo", icon: "👼", power: 160, type: RARITY.LEGENDARY },
+        { id: 18, name: "Titã", icon: "🦍", power: 180, type: RARITY.LEGENDARY },
+        { id: 19, name: "Alienígena", icon: "👽", power: 200, type: RARITY.LEGENDARY },
+        { id: 20, name: "Dragão Ancião", icon: "🐉", power: 250, type: RARITY.LEGENDARY }
+    ];
+
+    let player = {
+        coins: 200,
+        inventory: []
+    };
+
+    let marketPrices = {}; 
+    let marketTimer = 30;
+    let marketInterval;
+
+    // --- PERSISTENCE ---
+    function saveGame() {
+        localStorage.setItem('neonCards_save', JSON.stringify({
+            player: player,
+            marketPrices: marketPrices,
+            marketTimer: marketTimer
+        }));
+    }
+
+    function loadGame() {
+        const saved = localStorage.getItem('neonCards_save');
+        if (saved) {
+            const data = JSON.parse(saved);
+            player = data.player;
+            marketPrices = data.marketPrices || {};
+            marketTimer = data.marketTimer || 30;
+        } else {
+            initMarketPrices(); // First time setup
+        }
+        updateUI();
+    }
+
+    function resetGame() {
+        if(confirm("Tem certeza? Isso apagará todo seu progresso permanentemente.")) {
+            localStorage.removeItem('neonCards_save');
+            location.reload();
+        }
+    }
+
+    // --- CORE FUNCTIONS ---
+
+    function init() {
+        loadGame();
+        startMarketTimer();
+        renderAlbum(); 
+    }
+
+    function updateUI() {
+        document.getElementById('coin-display').innerText = player.coins;
+        document.getElementById('inventory-count').innerText = player.inventory.length;
+    }
+
+    function showSection(id) {
+        playSound('click');
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        
+        document.getElementById(id).classList.add('active');
+        
+        // Nav Highlight Logic
+        const navs = document.querySelectorAll('.nav-btn');
+        if(id === 'home') navs[0].classList.add('active');
+        if(id === 'shop') { navs[1].classList.add('active'); renderShop(); }
+        if(id === 'mine') navs[2].classList.add('active');
+        if(id === 'battle') { navs[3].classList.add('active'); renderBattleSelect(); }
+        if(id === 'album') { navs[4].classList.add('active'); renderAlbum(); }
+        
+        window.scrollTo(0,0);
+    }
+
+    function showToast(msg, type = 'info') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = msg;
+        if(type === 'success') toast.style.borderLeftColor = 'var(--success)';
+        if(type === 'error') toast.style.borderLeftColor = 'var(--danger)';
+        if(type === 'rare') toast.style.borderLeftColor = 'var(--rarity-super)';
+        
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = 0;
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    // --- MARKET SYSTEM ---
+
+    function initMarketPrices() {
+        CARD_DB.forEach(card => {
+            marketPrices[card.id] = card.type.basePrice;
+        });
+        saveGame();
+    }
+
+    function startMarketTimer() {
+        const timerEl = document.getElementById('market-timer');
+        
+        // Update immediately
+        timerEl.innerText = marketTimer;
+
+        marketInterval = setInterval(() => {
+            marketTimer--;
+            timerEl.innerText = marketTimer;
+            if (marketTimer <= 0) {
+                updateMarketPrices();
+                marketTimer = 30;
+                saveGame();
+                if(document.getElementById('shop').classList.contains('active')) renderShop();
+            }
+        }, 1000);
+    }
+
+    function updateMarketPrices() {
+        CARD_DB.forEach(card => {
+            const fluctuation = (Math.random() * 0.4) - 0.2; 
+            const newPrice = Math.floor(card.type.basePrice * (1 + fluctuation));
+            marketPrices[card.id] = Math.max(5, newPrice);
+        });
+        showToast("Mercado Atualizado!", "info");
+        playSound('click');
+        saveGame();
+    }
+
+    function renderShop() {
+        const shopGrid = document.getElementById('shop-grid');
+        const myGrid = document.getElementById('my-cards-grid');
+        const noCardsMsg = document.getElementById('no-cards-msg');
+        
+        shopGrid.innerHTML = '';
+        myGrid.innerHTML = '';
+
+        let hasCardsToSell = false;
+
+        // Render My Cards (Sell)
+        [...player.inventory].forEach((id, index) => {
+            hasCardsToSell = true;
+            const card = CARD_DB.find(c => c.id === id);
+            const sellPrice = Math.floor(marketPrices[id] * 0.6); 
+            
+            const div = document.createElement('div');
+            div.className = `card ${card.type.class}`;
+            div.innerHTML = `
+                <div class="card-bg-glow"></div>
+                <div class="card-header">
+                    <div class="card-rarity">${card.type.name}</div>
+                    <span class="card-icon">${card.icon}</span>
+                    <div class="card-name">${card.name}</div>
+                    <div class="card-power">⚔️ ${card.power}</div>
+                </div>
+                <button class="btn btn-sell" onclick="sellCard(${index})">Vender (${sellPrice}💰)</button>
+            `;
+            myGrid.appendChild(div);
+        });
+
+        if (!hasCardsToSell) noCardsMsg.style.display = 'block';
+        else noCardsMsg.style.display = 'none';
+
+        // Render Shop (Buy)
+        CARD_DB.forEach(card => {
+            const price = marketPrices[card.id];
+            const owned = player.inventory.includes(card.id);
+            
+            const div = document.createElement('div');
+            div.className = `card ${card.type.class}`;
+            div.innerHTML = `
+                <div class="card-bg-glow"></div>
+                <div class="card-header">
+                    <div class="card-rarity">${card.type.name}</div>
+                    <span class="card-icon">${card.icon}</span>
+                    <div class="card-name">${card.name}</div>
+                    <div class="card-power">⚔️ ${card.power}</div>
+                </div>
+                ${owned 
+                    ? `<div style="margin-top:auto; font-size:0.8rem; color:#94a3b8; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px;">Possuída</div>` 
+                    : `<button class="btn btn-buy" onclick="buyCard(${card.id})">Comprar (${price}💰)</button>`
+                }
+            `;
+            shopGrid.appendChild(div);
+        });
+    }
+
+    // Exposed to window for HTML onclick
+    window.buyCard = function(id) {
+        const price = marketPrices[id];
+        if (player.coins >= price) {
+            player.coins -= price;
+            player.inventory.push(id);
+            updateUI();
+            renderShop();
+            saveGame();
+            showToast(`Comprou ${CARD_DB.find(c=>c.id===id).name}!`, 'success');
+            playSound('buy');
+        } else {
+            showToast("Saldo insuficiente!", 'error');
+            playSound('lose');
+        }
+    }
+
+    window.sellCard = function(index) {
+        const id = player.inventory[index];
+        const price = Math.floor(marketPrices[id] * 0.6);
+        
+        player.inventory.splice(index, 1);
+        player.coins += price;
+        updateUI();
+        renderShop();
+        saveGame();
+        showToast(`Vendeu por ${price}💰`, 'success');
+        playSound('sell');
+    }
+
+    window.setBet = function(val) {
+        const input = document.getElementById('bet-amount');
+        if (val === 'ALL') input.value = player.coins;
+        else input.value = val;
+    }
+
+    // --- MINING SYSTEM ---
+    let currentDilemma = {};
+
+    window.startMining = function() {
+        playSound('click');
+        document.getElementById('mining-modal').style.display = 'flex';
+        generateDilemma();
+    }
+
+    window.closeMining = function() {
+        document.getElementById('mining-modal').style.display = 'none';
+        document.getElementById('dilemma-answer').value = '';
+    }
+
+    function generateDilemma() {
+        const types = ['math', 'logic', 'sequence'];
+        const type = types[Math.floor(Math.random() * types.length)];
+        let q = "", a = 0;
+
+        if (type === 'math') {
+            const n1 = Math.floor(Math.random() * 50) + 10;
+            const n2 = Math.floor(Math.random() * 50) + 10;
+            q = `Quanto é ${n1} + ${n2}?`;
+            a = n1 + n2;
+        } else if (type === 'logic') {
+            q = "Se ontem fosse amanhã, hoje seria sexta. Que dia é hoje? (1=Dom... 7=Sáb)";
+            a = 4; 
+        } else {
+            q = "Próximo número: 3, 6, 12, 24, ...";
+            a = 48;
+        }
+
+        currentDilemma = { answer: a };
+        document.getElementById('dilemma-question').innerText = q;
+    }
+
+    window.checkDilemma = function() {
+        const input = parseInt(document.getElementById('dilemma-answer').value);
+        if (input === currentDilemma.answer) {
+            closeMining();
+            processMiningResult();
+        } else {
+            showToast("Resposta Errada!", 'error');
+            playSound('lose');
+            closeMining();
+        }
+    }
+
+    function processMiningResult() {
+        if (Math.random() < 0.4) {
+            showToast("Falha no Scanner!", 'error');
+            playSound('lose');
+            return;
+        }
+
+        const rand = Math.random();
+        let type = RARITY.NORMAL;
+        
+        if (rand > 0.98) type = RARITY.LEGENDARY;
+        else if (rand > 0.90) type = RARITY.SUPER;
+        else if (rand > 0.65) type = RARITY.RARE;
+        
+        const pool = CARD_DB.filter(c => c.type === type);
+        const card = pool[Math.floor(Math.random() * pool.length)];
+
+        if (player.inventory.includes(card.id)) {
+            const refund = Math.floor(card.type.basePrice * 0.2);
+            player.coins += refund;
+            showToast(`Duplicata! Ganhou ${refund}💰`, 'info');
+        } else {
+            player.inventory.push(card.id);
+            showToast(`SUCESSO! ${card.name}`, 'rare');
+            playSound('rare');
+        }
+        updateUI();
+        saveGame();
+    }
+
+    // --- BATTLE SYSTEM ---
+
+    function renderBattleSelect() {
+        const select = document.getElementById('battle-card-select');
+        select.innerHTML = '<option value="">Selecione uma carta...</option>';
+        player.inventory.forEach(id => {
+            const card = CARD_DB.find(c => c.id === id);
+            const opt = document.createElement('option');
+            opt.value = card.id;
+            opt.text = `${card.name} (Poder: ${card.power})`;
+            select.appendChild(opt);
+        });
+    }
+
+    function logBattle(msg, type = 'neutral') {
+        const log = document.getElementById('battle-log');
+        const div = document.createElement('div');
+        div.className = `log-entry ${type === 'win' ? 'log-win' : type === 'lose' ? 'log-lose' : ''}`;
+        div.innerText = `> ${msg}`;
+        log.prepend(div);
+    }
+
+    window.startBattle = function() {
+        const bet = parseInt(document.getElementById('bet-amount').value);
+        const cardId = document.getElementById('battle-card-select').value;
+        const arena = document.getElementById('arena-display');
+        const btn = document.getElementById('btn-fight');
+        const log = document.getElementById('battle-log');
+
+        if (!cardId) { showToast("Escolha uma carta!", 'error'); return; }
+        if (bet > player.coins) { showToast("Saldo insuficiente!", 'error'); return; }
+        if (bet < 10) { showToast("Mínimo 10!", 'error'); return; }
+
+        player.coins -= bet;
+        updateUI();
+        saveGame();
+
+        btn.disabled = true;
+        btn.innerText = "LUTANDO...";
+        log.innerHTML = '';
+        arena.style.display = 'flex';
+        setTimeout(() => arena.style.opacity = 1, 50);
+
+        const playerCard = CARD_DB.find(c => c.id == cardId);
+        const aiCard = CARD_DB[Math.floor(Math.random() * CARD_DB.length)];
+
+        document.getElementById('player-battle-card').innerHTML = createBattleCardHTML(playerCard);
+        document.getElementById('ai-battle-card').innerHTML = createBattleCardHTML(aiCard);
+
+        logBattle(`Apostando ${bet} moedas...`);
+
+        setTimeout(() => { logBattle("Analisando poderes..."); playSound('click'); }, 1000);
+        setTimeout(() => { logBattle(`${playerCard.name} vs ${aiCard.name}!`); }, 2000);
+        setTimeout(() => { logBattle("Troca de golpes..."); playSound('click'); }, 3000);
+        
+        setTimeout(() => {
+            let result = "";
+            let win = false;
+
+            const playerRoll = playerCard.power + Math.floor(Math.random() * 20);
+            const aiRoll = aiCard.power + Math.floor(Math.random() * 20);
+
+            if (playerRoll > aiRoll) {
+                win = true;
+                const prize = bet * 2;
+                player.coins += prize;
+                result = `VITÓRIA! Ganhou ${prize}💰`;
+                logBattle(result, 'win');
+                playSound('win');
+                showToast(result, 'success');
+            } else {
+                result = `DERROTA! Perdeu ${bet}💰`;
+                logBattle(result, 'lose');
+                playSound('lose');
+                showToast(result, 'error');
+            }
+
+            updateUI();
+            saveGame();
+            btn.disabled = false;
+            btn.innerText = "⚔️ ENTRAR NA ARENA";
+            
+            setTimeout(() => {
+                arena.style.opacity = 0;
+                setTimeout(() => arena.style.display = 'none', 500);
+            }, 3000);
+
+        }, 5000);
+    }
+
+    function createBattleCardHTML(card) {
+        return `
+            <div class="card ${card.type.class}" style="transform: scale(0.85); height: 220px;">
+                <span class="card-icon">${card.icon}</span>
+                <div class="card-name">${card.name}</div>
+                <div class="card-power">⚔️ ${card.power}</div>
+            </div>
+        `;
+    }
+
+    // --- ALBUM ---
+    function renderAlbum() {
+        const grid = document.getElementById('album-grid');
+        grid.innerHTML = '';
+        CARD_DB.forEach(card => {
+            const owned = player.inventory.includes(card.id);
+            const div = document.createElement('div');
+            div.className = `card album-card ${owned ? card.type.class : 'locked'}`;
+            
+            if (owned) {
+                div.innerHTML = `
+                    <div class="card-bg-glow"></div>
+                    <div class="card-rarity">${card.type.name}</div>
+                    <span class="card-icon">${card.icon}</span>
+                    <div class="card-name">${card.name}</div>
+                    <div class="card-power">⚔️ ${card.power}</div>
+                `;
+            } else {
+                div.innerHTML = `
+                    <div class="card-rarity">???</div>
+                    <span class="card-icon"></span>
+                    <div class="card-name">Bloqueado</div>
+                    <div class="card-power">---</div>
+                `;
+            }
+            grid.appendChild(div);
+        });
+    }
+
+    // Start
+    init();
+
+</script>
+</body>
+</html>
