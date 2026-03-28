@@ -3,25 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Neon Card Master: Ultimate Edition</title>
+    <title>Neon Card Master: The House</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap');
 
         :root {
             --bg-dark: #020205;
-            --bg-panel: rgba(20, 25, 40, 0.85);
+            --bg-panel: rgba(20, 25, 40, 0.9);
             --primary: #00f2ff;
             --accent: #bd00ff;
             --danger: #ff0055;
             --success: #00ff9d;
             --gold: #ffd700;
-            --glass: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.08);
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
             
+            --elem-fire: #ff3333;
+            --elem-water: #3399ff;
+            --elem-earth: #99cc00;
+            --elem-air: #ffffff;
+            --elem-void: #cc33ff;
+
             --rarity-normal: #94a3b8;
             --rarity-rare: #38bdf8;
             --rarity-super: #d946ef;
             --rarity-legendary: #f59e0b;
+            --rarity-mythic: #ff0055;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Rajdhani', sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
@@ -31,15 +38,14 @@
             color: #e2e8f0; 
             padding-bottom: 90px; 
             background-image: 
-                radial-gradient(circle at 10% 20%, rgba(189, 0, 255, 0.08) 0%, transparent 25%),
-                radial-gradient(circle at 90% 80%, rgba(0, 242, 255, 0.08) 0%, transparent 25%);
+                radial-gradient(circle at 10% 20%, rgba(189, 0, 255, 0.1) 0%, transparent 30%),
+                radial-gradient(circle at 90% 80%, rgba(0, 242, 255, 0.1) 0%, transparent 30%);
             min-height: 100vh;
             overflow-x: hidden;
         }
 
-        /* --- HEADER --- */
         header {
-            background: rgba(2, 2, 5, 0.9);
+            background: rgba(2, 2, 5, 0.95);
             backdrop-filter: blur(15px);
             padding: 15px 20px;
             display: flex;
@@ -49,33 +55,34 @@
             top: 0;
             z-index: 90;
             border-bottom: 1px solid var(--border);
-            box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.8);
         }
 
-        .brand { font-family: 'Orbitron', sans-serif; font-size: 1.3rem; font-weight: 900; background: linear-gradient(to right, var(--primary), var(--accent)); -webkit-background-clip: text; color: transparent; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 20px rgba(0, 242, 255, 0.3); }
+        .brand { font-family: 'Orbitron', sans-serif; font-size: 1.2rem; font-weight: 900; background: linear-gradient(to right, var(--primary), var(--accent)); -webkit-background-clip: text; color: transparent; text-transform: uppercase; letter-spacing: 2px; }
         
-        .stats-bar { display: flex; gap: 10px; }
+        .stats-bar { display: flex; gap: 12px; }
         .stat-box { 
             background: var(--glass); 
-            padding: 6px 14px; 
+            padding: 8px 15px; 
             border-radius: 8px; 
             display: flex; 
             align-items: center; 
             gap: 8px; 
             border: 1px solid var(--border);
             font-weight: 700;
-            font-size: 0.95rem;
-            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+            font-size: 1rem;
+            min-width: 80px;
+            justify-content: center;
         }
-        .coin-text { color: var(--gold); text-shadow: 0 0 8px var(--gold); }
+        .coin-text { color: var(--gold); text-shadow: 0 0 10px var(--gold); }
+        .xp-text { color: var(--accent); text-shadow: 0 0 10px var(--accent); }
 
-        /* --- NAVIGATION --- */
         nav {
             position: fixed;
             bottom: 0;
             left: 0;
             width: 100%;
-            background: rgba(5, 5, 10, 0.95);
+            background: rgba(5, 5, 10, 0.98);
             backdrop-filter: blur(10px);
             display: flex;
             justify-content: space-around;
@@ -101,7 +108,6 @@
         .nav-btn.active { color: var(--primary); }
         .nav-btn.active span { filter: grayscale(0); text-shadow: 0 0 15px var(--primary); transform: translateY(-5px); }
 
-        /* --- SECTIONS --- */
         .section { display: none; padding: 20px; max-width: 600px; margin: 0 auto; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         .section.active { display: block; }
         
@@ -120,27 +126,26 @@
             align-items: center;
         }
 
-        /* --- CARDS DESIGN --- */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
 
         .card {
-            background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+            background: linear-gradient(160deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
             border-radius: 12px;
             padding: 12px;
             text-align: center;
             position: relative;
             overflow: hidden;
             border: 1px solid var(--border);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            transition: all 0.2s;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            height: 250px;
+            height: 240px;
             cursor: pointer;
         }
 
-        .card:active { transform: scale(0.95); }
+        .card:active { transform: scale(0.96); }
         
         .card-bg-glow {
             position: absolute;
@@ -152,21 +157,33 @@
         }
         .card:hover .card-bg-glow { opacity: 1; }
 
-        .card-header { position: relative; z-index: 2; margin-bottom: auto; }
-        .card-icon { font-size: 3.5rem; margin: 10px 0; display: block; filter: drop-shadow(0 0 10px rgba(255,255,255,0.2)); }
-        .card-name { font-weight: 700; font-size: 1rem; margin-bottom: 5px; text-transform: uppercase; line-height: 1.1; }
-        .card-power { font-size: 1.2rem; font-weight: 700; color: var(--gold); text-shadow: 0 0 8px rgba(251, 191, 36, 0.6); }
-        .card-rarity { font-size: 0.65rem; letter-spacing: 1px; margin-bottom: 5px; padding: 3px 8px; border-radius: 4px; display: inline-block; font-weight: bold; }
+        .card-header { position: relative; z-index: 2; margin-bottom: auto; width: 100%; }
+        
+        .card-badges { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .card-rarity { font-size: 0.65rem; letter-spacing: 1px; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
+        .card-element { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; font-weight: bold; border: 1px solid rgba(255,255,255,0.3); }
 
-        /* Rarity Borders */
+        .card-icon { font-size: 3.5rem; margin: 5px 0; display: block; filter: drop-shadow(0 0 8px rgba(255,255,255,0.3)); }
+        .card-name { font-weight: 700; font-size: 1rem; margin-bottom: 5px; text-transform: uppercase; line-height: 1.1; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        
+        .card-stats { display: flex; justify-content: center; align-items: center; gap: 5px; margin-top: 5px; }
+        .card-power { font-size: 1.4rem; font-weight: 900; color: var(--gold); text-shadow: 0 0 10px rgba(251, 191, 36, 0.6); }
+        .power-label { font-size: 0.8rem; color: #94a3b8; font-weight: bold; }
+
         .rarity-normal { border-bottom: 4px solid var(--rarity-normal); color: var(--rarity-normal); }
-        .rarity-rare { border-bottom: 4px solid var(--rarity-rare); color: var(--rarity-rare); box-shadow: inset 0 0 20px rgba(56, 189, 248, 0.1); }
-        .rarity-super { border-bottom: 4px solid var(--rarity-super); color: var(--rarity-super); background: linear-gradient(180deg, rgba(217, 70, 239, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%); }
-        .rarity-legendary { border-bottom: 4px solid var(--rarity-legendary); color: var(--rarity-legendary); box-shadow: 0 0 20px rgba(245, 158, 11, 0.3); animation: pulse 3s infinite; }
+        .rarity-rare { border-bottom: 4px solid var(--rarity-rare); color: var(--rarity-rare); box-shadow: inset 0 0 15px rgba(56, 189, 248, 0.1); }
+        .rarity-super { border-bottom: 4px solid var(--rarity-super); color: var(--rarity-super); }
+        .rarity-legendary { border-bottom: 4px solid var(--rarity-legendary); color: var(--rarity-legendary); box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); }
+        .rarity-mythic { border-bottom: 4px solid var(--rarity-mythic); color: var(--rarity-mythic); animation: pulse 2s infinite; }
 
-        @keyframes pulse { 0% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); } 50% { box-shadow: 0 0 30px rgba(245, 158, 11, 0.6); } 100% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); } }
+        @keyframes pulse { 0% { box-shadow: 0 0 10px rgba(255, 0, 85, 0.3); } 50% { box-shadow: 0 0 25px rgba(255, 0, 85, 0.6); } 100% { box-shadow: 0 0 10px rgba(255, 0, 85, 0.3); } }
 
-        /* Buttons */
+        .elem-fire { background: rgba(255, 51, 51, 0.2); color: var(--elem-fire); }
+        .elem-water { background: rgba(51, 153, 255, 0.2); color: var(--elem-water); }
+        .elem-earth { background: rgba(153, 204, 0, 0.2); color: var(--elem-earth); }
+        .elem-air { background: rgba(255, 255, 255, 0.2); color: var(--elem-air); }
+        .elem-void { background: rgba(204, 51, 255, 0.2); color: var(--elem-void); }
+
         .btn {
             width: 100%; padding: 12px; border: none; border-radius: 8px;
             font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
@@ -182,120 +199,85 @@
         .btn-sell:hover { background: #ff3377; box-shadow: 0 0 25px var(--danger); }
         
         .btn-action { background: var(--accent); color: white; font-size: 1.1rem; padding: 18px; box-shadow: 0 0 20px rgba(189, 0, 255, 0.5); }
-        .btn-action:hover { background: #d946ef; box-shadow: 0 0 35px var(--accent); }
-        .btn-action:disabled { background: #475569; cursor: not-allowed; box-shadow: none; opacity: 0.7; }
+        .btn-action:disabled { background: #475569; cursor: not-allowed; box-shadow: none; }
 
-        /* --- SHOP SPECIFIC --- */
-        .market-timer { 
-            background: rgba(0,0,0,0.4); 
-            padding: 15px; 
-            border-radius: 10px; 
-            text-align: center; 
-            margin-bottom: 20px; 
-            font-weight: bold; 
-            border: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            backdrop-filter: blur(5px);
-        }
-        .timer-val { color: var(--primary); font-family: 'Orbitron', monospace; font-size: 1.3rem; }
-        
+        .market-timer { background: rgba(0,0,0,0.6); padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 20px; font-weight: bold; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(5px); position: sticky; top: 80px; z-index: 80; }
+        .timer-val { color: var(--primary); font-family: 'Orbitron'; font-size: 1.2rem; }
         .shop-split { display: flex; flex-direction: column; gap: 30px; }
-        .shop-section-title { font-size: 1.2rem; color: #94a3b8; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .shop-section-title { font-size: 1.2rem; color: #fff; margin-bottom: 15px; border-bottom: 2px solid var(--border); padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .shop-section-title span.sub { font-size: 0.8rem; color: #94a3b8; font-weight: normal; }
 
-        /* --- MINING --- */
-        .mining-container { text-align: center; padding: 50px 20px; background: rgba(0,0,0,0.4); border-radius: 20px; border: 1px solid var(--border); backdrop-filter: blur(5px); margin-bottom: 20px; }
-        .mining-icon { font-size: 6rem; margin-bottom: 20px; animation: float 3s ease-in-out infinite; filter: drop-shadow(0 0 30px var(--success)); }
-        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-20px); } 100% { transform: translateY(0px); } }
+        .mining-container { text-align: center; padding: 40px 20px; background: rgba(0,0,0,0.6); border-radius: 15px; border: 1px solid var(--border); backdrop-filter: blur(5px); margin-bottom: 20px; }
+        .mining-icon { font-size: 5rem; margin-bottom: 20px; animation: float 3s ease-in-out infinite; filter: drop-shadow(0 0 20px var(--success)); }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0px); } }
 
-        /* --- BATTLE --- */
         .battle-arena { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; position: relative; min-height: 280px; perspective: 1000px; }
         .battle-card-slot { width: 45%; text-align: center; }
-        .vs-badge { font-size: 3rem; font-weight: 900; color: var(--danger); text-shadow: 0 0 30px var(--danger); z-index: 2; font-family: 'Orbitron'; }
-        
-        .battle-log { 
-            margin-top: 20px; 
-            background: rgba(0,0,0,0.6); 
-            padding: 15px; 
-            border-radius: 10px; 
-            font-family: 'Courier New', monospace; 
-            font-size: 0.9rem; 
-            height: 150px; 
-            overflow-y: auto; 
-            border: 1px solid var(--border); 
-            color: #cbd5e1;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
-        }
-        .log-entry { margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
+        .vs-badge { font-size: 3rem; font-weight: 900; color: var(--danger); text-shadow: 0 0 20px var(--danger); z-index: 2; font-family: 'Orbitron'; }
+        .battle-log { margin-top: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 10px; font-family: 'Courier New', monospace; font-size: 0.9rem; height: 150px; overflow-y: auto; border: 1px solid var(--border); color: #cbd5e1; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
+        .log-entry { margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; }
         .log-win { color: var(--success); text-shadow: 0 0 5px var(--success); }
         .log-lose { color: var(--danger); text-shadow: 0 0 5px var(--danger); }
 
-        /* --- MODAL --- */
-        .modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); backdrop-filter: blur(10px);
-            justify-content: center; align-items: center; z-index: 200;
-        }
-        .modal-content {
-            background: #1e293b; padding: 40px; border-radius: 25px; text-align: center;
-            max-width: 90%; width: 450px; border: 2px solid var(--accent);
-            box-shadow: 0 0 60px rgba(189, 0, 255, 0.3);
-            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); justify-content: center; align-items: center; z-index: 200; }
+        .modal-content { background: #1e293b; padding: 40px; border-radius: 20px; text-align: center; max-width: 90%; width: 450px; border: 2px solid var(--accent); box-shadow: 0 0 60px rgba(189, 0, 255, 0.4); animation: popIn 0.3s; }
         @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        
-        .dilemma-box { margin: 30px 0; font-size: 1.6rem; font-weight: bold; color: #fff; font-family: 'Orbitron'; line-height: 1.4; }
-        .input-field { width: 100%; padding: 18px; background: #0f172a; border: 2px solid #334155; color: white; border-radius: 12px; font-size: 1.8rem; text-align: center; margin-bottom: 20px; font-family: 'Orbitron'; }
+        .dilemma-box { margin: 30px 0; font-size: 1.5rem; font-weight: bold; color: #fff; font-family: 'Orbitron'; line-height: 1.4; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; border: 1px solid var(--border); }
+        .input-field { width: 100%; padding: 18px; background: #0f172a; border: 2px solid #334155; color: white; border-radius: 10px; font-size: 1.8rem; text-align: center; margin-bottom: 20px; font-family: 'Orbitron'; }
         .input-field:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 20px rgba(0, 242, 255, 0.3); }
 
-        /* --- NOTIFICATION --- */
         #toast-container { position: fixed; top: 90px; right: 20px; z-index: 300; display: flex; flex-direction: column; gap: 12px; pointer-events: none; max-width: 350px; }
-        .toast { 
-            background: rgba(15, 23, 42, 0.95); 
-            color: white; 
-            padding: 18px 25px; 
-            border-radius: 12px; 
-            border-left: 6px solid var(--primary); 
-            box-shadow: 0 15px 40px rgba(0,0,0,0.6); 
-            animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            backdrop-filter: blur(5px);
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
+        .toast { background: rgba(15, 23, 42, 0.95); color: white; padding: 18px 25px; border-radius: 10px; border-left: 6px solid var(--primary); box-shadow: 0 15px 40px rgba(0,0,0,0.6); animation: slideIn 0.4s; backdrop-filter: blur(5px); font-weight: 600; min-width: 250px; }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-        /* --- ALBUM --- */
+        .daily-box { background: linear-gradient(45deg, #1e293b, #0f172a); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--gold); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 5px 15px rgba(255, 215, 0, 0.1); }
+        .daily-btn { background: var(--gold); color: #000; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; font-family: 'Orbitron'; text-transform: uppercase; }
+        .daily-btn:disabled { background: #475569; color: #888; cursor: not-allowed; }
+
         .album-card.locked { filter: grayscale(1) brightness(0.3); opacity: 0.5; }
         .album-card.locked .card-icon::after { content: '?'; font-size: 3.5rem; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; }
         .album-card.locked .card-name, .album-card.locked .card-power { visibility: hidden; }
-        
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        .home-stats-box { background: linear-gradient(135deg, rgba(0, 242, 255, 0.1), rgba(189, 0, 255, 0.1)); padding: 25px; border-radius: 15px; margin-bottom: 25px; color: white; border: 1px solid var(--border); }
+        .xp-container { width: 100%; height: 8px; background: #333; border-radius: 4px; margin-top: 10px; overflow: hidden; }
+        .xp-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.5s; box-shadow: 0 0 10px var(--accent); }
 
     </style>
 </head>
 <body>
 
 <header>
-    <div class="brand">NEON CARDS <span style="font-size:0.7rem; vertical-align: super; color:var(--primary)">ULTIMATE</span></div>
+    <div class="brand">NEON HOUSE</div>
     <div class="stats-bar">
         <div class="stat-box"><span class="coin-text">💰</span> <span id="coin-display">0</span></div>
-        <div class="stat-box"><span>📦</span> <span id="inventory-count">0</span></div>
+        <div class="stat-box"><span class="xp-text">⚡</span> LVL <span id="level-display">1</span></div>
     </div>
 </header>
 
 <!-- HOME -->
 <div id="home" class="section active">
     <h2>Painel de Controle</h2>
-    <div style="background: linear-gradient(135deg, rgba(0, 242, 255, 0.1), rgba(189, 0, 255, 0.1)); padding: 30px; border-radius: 20px; margin-bottom: 30px; color: white; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-        <h3 style="font-family: 'Orbitron'; margin-bottom: 15px; font-size: 1.4rem;">Bem-vindo, Colecionador.</h3>
-        <p style="opacity: 0.9; line-height: 1.6; margin-bottom: 20px;">O mercado está volátil. Minere com cuidado e aposte com sabedoria. Seus dados são salvos automaticamente.</p>
-        <div style="font-size: 0.85rem; color: var(--primary); border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
-            <button class="btn btn-sell" style="width: auto; padding: 8px 20px; font-size: 0.8rem;" onclick="resetGame()">⚠️ Resetar Save</button>
+    
+    <div class="daily-box">
+        <div>
+            <div style="font-weight: bold; color: var(--gold); font-family: 'Orbitron';">BÔNUS DIÁRIO</div>
+            <div style="font-size: 0.85rem; color: #94a3b8;">Recursos grátis a cada 24h</div>
+        </div>
+        <button id="daily-btn" class="daily-btn" onclick="claimDaily()">RESGATAR</button>
+    </div>
+
+    <div class="home-stats-box">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px;">
+            <div>
+                <h3 style="font-family: 'Orbitron'; font-size: 1.4rem;">Nível <span id="home-level">1</span></h3>
+                <div style="color: var(--primary); font-weight: bold;" id="home-rank">Novato</div>
+            </div>
+            <div style="text-align: right; font-size: 0.9rem; color: #cbd5e1;">
+                XP: <span id="xp-text">0/100</span>
+            </div>
+        </div>
+        <div class="xp-container">
+            <div id="xp-bar" class="xp-fill"></div>
         </div>
     </div>
     
@@ -304,19 +286,19 @@
             <div class="card-bg-glow"></div>
             <span class="card-icon">🏪</span>
             <div class="card-name">Mercado</div>
-            <div style="font-size: 0.9rem; color: #94a3b8;">Compre e Venda</div>
+            <div style="font-size: 0.8rem; color: #94a3b8;">Comprar/Vender</div>
         </div>
         <div class="card" onclick="showSection('mine')" style="cursor: pointer; border-color: var(--success);">
             <div class="card-bg-glow"></div>
             <span class="card-icon">⛏️</span>
             <div class="card-name">Mineração</div>
-            <div style="font-size: 0.9rem; color: #94a3b8;">Risco Alto</div>
+            <div style="font-size: 0.8rem; color: #94a3b8;">Enigmas & Risco</div>
         </div>
         <div class="card" onclick="showSection('battle')" style="cursor: pointer; border-color: var(--danger);">
             <div class="card-bg-glow"></div>
             <span class="card-icon">⚔️</span>
             <div class="card-name">Arena</div>
-            <div style="font-size:0.9rem; color: #94a3b8;">PvP vs IA</div>
+            <div style="font-size: 0.8rem; color: #94a3b8;">PvP Estratégico</div>
         </div>
     </div>
 </div>
@@ -325,26 +307,24 @@
 <div id="shop" class="section">
     <h2>Mercado Negro</h2>
     <div class="market-timer">
-        <span>Próxima atualização:</span>
+        <span>Atualização em:</span>
         <span id="market-timer" class="timer-val">30</span>s
     </div>
 
     <div class="shop-split">
-        <!-- Minha Coleção (Venda) -->
         <div>
             <div class="shop-section-title">
-                <span>Minha Coleção</span>
-                <span style="font-size: 0.8rem; color: var(--danger)">Venda Rápida</span>
+                Minha Coleção
+                <span class="sub">Venda por 40% do valor</span>
             </div>
             <div id="my-cards-grid" class="grid"></div>
-            <p id="no-cards-msg" style="text-align: center; color: #64748b; margin-top: 20px; font-style: italic; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 10px;">Seu inventário está vazio. Vá minerar ou compre cartas!</p>
+            <p id="no-cards-msg" style="text-align: center; color: #64748b; margin-top: 20px; font-style: italic; padding: 20px; background: rgba(0,0,0,0.3); border-radius: 10px;">Inventário vazio. Vá minerar!</p>
         </div>
 
-        <!-- Loja (Compra) -->
         <div>
             <div class="shop-section-title">
-                <span>Disponíveis</span>
-                <span style="font-size: 0.8rem; color: var(--primary)">Preços Dinâmicos</span>
+                Disponível no Mercado
+                <span class="sub">Preços Dinâmicos</span>
             </div>
             <div id="shop-grid" class="grid"></div>
         </div>
@@ -356,23 +336,22 @@
     <h2>Mineração Profunda</h2>
     <div class="mining-container">
         <div class="mining-icon">💎</div>
-        <p style="margin-bottom: 30px; color: #94a3b8; line-height: 1.6; font-size: 1.1rem;">Resolva o enigma de segurança para ativar o scanner quântico.<br><strong>Aviso:</strong> Falhar no enigma ou ter azar no scanner resulta em perda de recursos.</p>
+        <p style="margin-bottom: 25px; color: #94a3b8; line-height: 1.6; font-size: 1.1rem;">Resolva o enigma de segurança para ativar o scanner quântico.<br><strong>Nível alto = Melhores chances.</strong></p>
         <button class="btn btn-action" onclick="startMining()">INICIAR PROTOCOLO</button>
     </div>
-    <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 15px;">
-        <h3 style="font-size: 1.1rem; color: var(--primary); margin-bottom: 15px; font-family: 'Orbitron'">Probabilidades do Scanner</h3>
-        
-        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px;"><span>Comum</span> <span>65%</span></div>
-        <div style="width: 100%; height: 6px; background: #333; border-radius: 3px; margin-bottom: 15px;"><div style="width: 65%; height: 100%; background: var(--rarity-normal); border-radius: 3px; box-shadow: 0 0 10px var(--rarity-normal);"></div></div>
+    <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 15px; border: 1px solid var(--border);">
+        <h3 style="font-size: 1.1rem; color: var(--primary); margin-bottom: 15px; font-family: 'Orbitron'">Probabilidades</h3>
+        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px;"><span>Comum</span> <span>60%</span></div>
+        <div style="width: 100%; height: 6px; background: #333; border-radius: 3px; margin-bottom: 15px;"><div style="width: 60%; height: 100%; background: var(--rarity-normal); border-radius: 3px;"></div></div>
         
         <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px;"><span>Rara</span> <span>25%</span></div>
-        <div style="width: 100%; height: 6px; background: #333; border-radius: 3px; margin-bottom: 15px;"><div style="width: 25%; height: 100%; background: var(--rarity-rare); border-radius: 3px; box-shadow: 0 0 10px var(--rarity-rare);"></div></div>
+        <div style="width: 100%; height: 6px; background: #333; border-radius: 3px; margin-bottom: 15px;"><div style="width: 25%; height: 100%; background: var(--rarity-rare); border-radius: 3px;"></div></div>
 
-        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px;"><span>Épica</span> <span>8%</span></div>
-        <div style="width: 100%; height: 6px; background: #333; border-radius: 3px; margin-bottom: 15px;"><div style="width: 8%; height: 100%; background: var(--rarity-super); border-radius: 3px; box-shadow: 0 0 10px var(--rarity-super);"></div></div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px;"><span>Épica</span> <span>10%</span></div>
+        <div style="width: 100%; height: 6px; background: #333; border-radius: 3px; margin-bottom: 15px;"><div style="width: 10%; height: 100%; background: var(--rarity-super); border-radius: 3px;"></div></div>
 
-        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px;"><span>Lendária</span> <span>2%</span></div>
-        <div style="width: 100%; height: 6px; background: #333; border-radius: 3px;"><div style="width: 2%; height: 100%; background: var(--rarity-legendary); border-radius: 3px; box-shadow: 0 0 10px var(--rarity-legendary);"></div></div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px;"><span>Lendária+</span> <span>5%</span></div>
+        <div style="width: 100%; height: 6px; background: #333; border-radius: 3px;"><div style="width: 5%; height: 100%; background: var(--rarity-legendary); border-radius: 3px;"></div></div>
     </div>
 </div>
 
@@ -380,18 +359,18 @@
 <div id="battle" class="section">
     <h2>Arena de Combate</h2>
     
-    <div style="background: rgba(30, 41, 59, 0.5); padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 1px solid var(--border);">
-        <label style="display: block; margin-bottom: 10px; color: #94a3b8; font-size: 1rem;">Definir Aposta (Mínimo 10):</label>
+    <div style="background: rgba(30, 41, 59, 0.6); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border);">
+        <label style="display: block; margin-bottom: 10px; color: #94a3b8; font-size: 1rem; font-weight: bold;">Definir Aposta (Mínimo 10):</label>
         <div style="display: flex; gap: 10px;">
             <input type="number" id="bet-amount" class="input-field" style="margin: 0; font-size: 1.3rem;" value="50">
             <button class="btn btn-buy" style="width: auto;" onclick="setBet(50)">50</button>
             <button class="btn btn-buy" style="width: auto;" onclick="setBet(100)">100</button>
-            <button class="btn btn-buy" style="width: auto;" onclick="setBet('ALL')">ALL</button>
+            <button class="btn btn-buy" style="width: auto;" onclick="setBet('ALL')">ALL IN</button>
         </div>
     </div>
 
     <div style="margin-bottom: 20px;">
-        <label style="display: block; margin-bottom: 10px; color: #94a3b8; font-size: 1rem;">Escolha seu Lutador:</label>
+        <label style="display: block; margin-bottom: 10px; color: #94a3b8; font-size: 1rem; font-weight: bold;">Escolha seu Lutador:</label>
         <select id="battle-card-select" class="input-field" style="text-align: left; cursor: pointer;">
             <option value="">Selecione uma carta...</option>
         </select>
@@ -411,7 +390,7 @@
 <!-- ALBUM -->
 <div id="album" class="section">
     <h2>Álbum de Cartas</h2>
-    <p style="margin-bottom: 20px; color: #94a3b8; font-size: 1rem;">Complete a coleção para desbloquear o prestígio máximo.</p>
+    <p style="margin-bottom: 20px; color: #94a3b8; font-size: 1rem;">Colete as 120 cartas para se tornar uma Lenda.</p>
     <div id="album-grid" class="grid"></div>
 </div>
 
@@ -420,7 +399,7 @@
     <div class="modal-content">
         <h3 style="color: var(--accent); margin-bottom: 20px; font-family: 'Orbitron'; font-size: 1.5rem;">ENIGMA DE SEGURANÇA</h3>
         <div class="dilemma-box" id="dilemma-question">Carregando...</div>
-        <input type="number" id="dilemma-answer" class="input-field" placeholder="?">
+        <input type="text" id="dilemma-answer" class="input-field" placeholder="?">
         <button class="btn btn-action" onclick="checkDilemma()">DESBLOQUEAR</button>
         <button class="btn btn-sell" style="margin-top: 15px;" onclick="closeMining()">CANCELAR</button>
     </div>
@@ -448,113 +427,108 @@
 </nav>
 
 <script>
-    // --- AUDIO SYSTEM (Synth) ---
+    // --- AUDIO SYSTEM ---
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    
     function playSound(type) {
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
         const gainNode = audioCtx.createGain();
         osc.connect(gainNode);
         gainNode.connect(audioCtx.destination);
-
         const now = audioCtx.currentTime;
 
         if (type === 'click') {
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(800, now);
-            osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
-            gainNode.gain.setValueAtTime(0.1, now);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-            osc.start(now);
-            osc.stop(now + 0.1);
+            osc.type = 'sine'; osc.frequency.setValueAtTime(800, now); osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
+            gainNode.gain.setValueAtTime(0.1, now); gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+            osc.start(now); osc.stop(now + 0.1);
         } else if (type === 'buy') {
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(400, now);
-            osc.frequency.linearRampToValueAtTime(800, now + 0.15);
-            gainNode.gain.setValueAtTime(0.1, now);
-            gainNode.gain.linearRampToValueAtTime(0, now + 0.2);
-            osc.start(now);
-            osc.stop(now + 0.2);
+            osc.type = 'triangle'; osc.frequency.setValueAtTime(400, now); osc.frequency.linearRampToValueAtTime(800, now + 0.15);
+            gainNode.gain.setValueAtTime(0.1, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.2);
+            osc.start(now); osc.stop(now + 0.2);
         } else if (type === 'sell') {
-            osc.type = 'square';
-            osc.frequency.setValueAtTime(300, now);
-            osc.frequency.linearRampToValueAtTime(150, now + 0.15);
-            gainNode.gain.setValueAtTime(0.05, now);
-            gainNode.gain.linearRampToValueAtTime(0, now + 0.2);
-            osc.start(now);
-            osc.stop(now + 0.2);
+            osc.type = 'square'; osc.frequency.setValueAtTime(300, now); osc.frequency.linearRampToValueAtTime(150, now + 0.15);
+            gainNode.gain.setValueAtTime(0.05, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.2);
+            osc.start(now); osc.stop(now + 0.2);
         } else if (type === 'win') {
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(500, now);
-            osc.frequency.setValueAtTime(800, now + 0.1);
-            osc.frequency.setValueAtTime(1200, now + 0.2);
-            gainNode.gain.setValueAtTime(0.1, now);
-            gainNode.gain.linearRampToValueAtTime(0, now + 0.6);
-            osc.start(now);
-            osc.stop(now + 0.6);
+            osc.type = 'sine'; osc.frequency.setValueAtTime(500, now); osc.frequency.setValueAtTime(800, now + 0.1); osc.frequency.setValueAtTime(1200, now + 0.2);
+            gainNode.gain.setValueAtTime(0.1, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.6);
+            osc.start(now); osc.stop(now + 0.6);
         } else if (type === 'lose') {
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(200, now);
-            osc.frequency.linearRampToValueAtTime(80, now + 0.4);
-            gainNode.gain.setValueAtTime(0.1, now);
-            gainNode.gain.linearRampToValueAtTime(0, now + 0.4);
-            osc.start(now);
-            osc.stop(now + 0.4);
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, now); osc.frequency.linearRampToValueAtTime(80, now + 0.4);
+            gainNode.gain.setValueAtTime(0.1, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.4);
+            osc.start(now); osc.stop(now + 0.4);
         } else if (type === 'rare') {
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(400, now);
-            osc.frequency.linearRampToValueAtTime(1200, now + 0.6);
-            gainNode.gain.setValueAtTime(0.1, now);
-            gainNode.gain.linearRampToValueAtTime(0, now + 0.6);
-            osc.start(now);
-            osc.stop(now + 0.6);
+            osc.type = 'sine'; osc.frequency.setValueAtTime(400, now); osc.frequency.linearRampToValueAtTime(1200, now + 0.6);
+            gainNode.gain.setValueAtTime(0.1, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.6);
+            osc.start(now); osc.stop(now + 0.6);
         }
     }
 
-    // --- DATA ---
-    const RARITY = {
-        NORMAL: { name: 'Comum', class: 'rarity-normal', chance: 0.65, basePrice: 20 },
-        RARE: { name: 'Rara', class: 'rarity-rare', chance: 0.25, basePrice: 80 },
-        SUPER: { name: 'Épica', class: 'rarity-super', chance: 0.08, basePrice: 250 },
-        LEGENDARY: { name: 'Lendária', class: 'rarity-legendary', chance: 0.02, basePrice: 1000 }
+    // --- DATA GENERATION (120 CARDS) ---
+    const ELEMENTS = {
+        FIRE: { name: 'Fogo', class: 'elem-fire', beats: 'EARTH' },
+        WATER: { name: 'Água', class: 'elem-water', beats: 'FIRE' },
+        EARTH: { name: 'Terra', class: 'elem-earth', beats: 'WATER' },
+        AIR: { name: 'Ar', class: 'elem-air', beats: null },
+        VOID: { name: 'Vazio', class: 'elem-void', beats: null }
     };
 
-    const CARD_DB = [
-        { id: 1, name: "Recruta", icon: "👶", power: 10, type: RARITY.NORMAL },
-        { id: 2, name: "Goblin", icon: "👺", power: 15, type: RARITY.NORMAL },
-        { id: 3, name: "Arqueiro", icon: "🏹", power: 20, type: RARITY.NORMAL },
-        { id: 4, name: "Escudeiro", icon: "🛡️", power: 25, type: RARITY.NORMAL },
-        { id: 5, name: "Lobo", icon: "🐺", power: 30, type: RARITY.NORMAL },
-        { id: 6, name: "Mago Iniciante", icon: "🧙‍♂️", power: 35, type: RARITY.NORMAL },
-        { id: 7, name: "Cavaleiro", icon: "⚔️", power: 50, type: RARITY.RARE },
-        { id: 8, name: "Bruxa", icon: "🧙‍♀️", power: 55, type: RARITY.RARE },
-        { id: 9, name: "Golem", icon: "🗿", power: 60, type: RARITY.RARE },
-        { id: 10, name: "Vampiro", icon: "🧛", power: 65, type: RARITY.RARE },
-        { id: 11, name: "Dragão Bebê", icon: "🐲", power: 70, type: RARITY.RARE },
-        { id: 12, name: "General", icon: "🎖️", power: 85, type: RARITY.SUPER },
-        { id: 13, name: "Necromante", icon: "💀", power: 90, type: RARITY.SUPER },
-        { id: 14, name: "Fênix", icon: "🦅", power: 95, type: RARITY.SUPER },
-        { id: 15, name: "Cyborg", icon: "🤖", power: 100, type: RARITY.SUPER },
-        { id: 16, name: "Rei Demônio", icon: "👹", power: 150, type: RARITY.LEGENDARY },
-        { id: 17, name: "Anjo", icon: "👼", power: 160, type: RARITY.LEGENDARY },
-        { id: 18, name: "Titã", icon: "🦍", power: 180, type: RARITY.LEGENDARY },
-        { id: 19, name: "Alienígena", icon: "👽", power: 200, type: RARITY.LEGENDARY },
-        { id: 20, name: "Dragão Ancião", icon: "🐉", power: 250, type: RARITY.LEGENDARY }
-    ];
+    const RARITY = {
+        NORMAL: { name: 'Comum', class: 'rarity-normal', chance: 0.60, basePrice: 20, powerMin: 10, powerMax: 30 },
+        RARE: { name: 'Rara', class: 'rarity-rare', chance: 0.25, basePrice: 80, powerMin: 35, powerMax: 60 },
+        SUPER: { name: 'Épica', class: 'rarity-super', chance: 0.10, basePrice: 250, powerMin: 65, powerMax: 90 },
+        LEGENDARY: { name: 'Lendária', class: 'rarity-legendary', chance: 0.04, basePrice: 800, powerMin: 95, powerMax: 130 },
+        MYTHIC: { name: 'Mítica', class: 'rarity-mythic', chance: 0.01, basePrice: 2500, powerMin: 140, powerMax: 200 }
+    };
 
+    const CARD_DB = [];
+    const ICONS = ['👶','👺','🏹','🛡️','🐺','🧙‍♂️','⚔️','🧙‍♀️','🗿','🧛','🐲','🎖️','💀','🦅','🤖','👹','👼','🦍','👽','🐉','🦄','🧟','🧞','🧚','🧜','🦇','🦂','🦖','🦕','🐙','🦈','🐅','🦁','🐘','🦏','🦒','🦓','🦍','🦧','🐒','🐕','🐈','🐇','🦊','🦝','🐿️','🦫','🦔','🦎','🐢','🐍','🦕','🦖','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🦮','🐕','🐩','🦝','🐈','🐈‍⬛','🐅','🐆','🦓','🦍','🦧','🦮','🐕','🐩','🦝','🐈','🐈‍⬛','🐉','🦄','🦓','🦍','🦧','🦮','🐕','🐩','🦝','🐈','🐈‍⬛','🐅','🐆','🦓','🦍','🦧','🦮','🐕','🐩','🦝','🐈','🐈‍⬛','🐉','🦄'];
+    
+    let idCounter = 1;
+    for (let i = 0; i < 120; i++) {
+        let rarity = RARITY.NORMAL;
+        const rand = Math.random();
+        if (rand > 0.99) rarity = RARITY.MYTHIC;
+        else if (rand > 0.95) rarity = RARITY.LEGENDARY;
+        else if (rand > 0.85) rarity = RARITY.SUPER;
+        else if (rand > 0.60) rarity = RARITY.RARE;
+
+        const elemKeys = Object.keys(ELEMENTS);
+        const elemKey = elemKeys[Math.floor(Math.random() * elemKeys.length)];
+        const element = ELEMENTS[elemKey];
+
+        const power = Math.floor(Math.random() * (rarity.powerMax - rarity.powerMin + 1)) + rarity.powerMin;
+        
+        CARD_DB.push({
+            id: idCounter++,
+            name: `Carta #${idCounter-1}`,
+            icon: ICONS[i % ICONS.length],
+            power: power,
+            type: rarity,
+            element: element
+        });
+    }
+
+    // --- STATE ---
     let player = {
-        coins: 200,
-        inventory: []
+        coins: 300,
+        inventory: [], 
+        level: 1,
+        xp: 0,
+        xpToNext: 100,
+        lastDaily: 0,
+        winStreak: 0,
+        lossStreak: 0
     };
 
     let marketPrices = {}; 
     let marketTimer = 30;
     let marketInterval;
+    let currentDilemma = {};
 
     // --- PERSISTENCE ---
     function saveGame() {
-        localStorage.setItem('neonCards_save', JSON.stringify({
+        localStorage.setItem('neonHouse_save', JSON.stringify({
             player: player,
             marketPrices: marketPrices,
             marketTimer: marketTimer
@@ -562,27 +536,27 @@
     }
 
     function loadGame() {
-        const saved = localStorage.getItem('neonCards_save');
+        const saved = localStorage.getItem('neonHouse_save');
         if (saved) {
             const data = JSON.parse(saved);
             player = data.player;
             marketPrices = data.marketPrices || {};
             marketTimer = data.marketTimer || 30;
         } else {
-            initMarketPrices(); // First time setup
+            initMarketPrices();
         }
         updateUI();
+        checkDaily();
     }
 
     function resetGame() {
-        if(confirm("Tem certeza? Isso apagará todo seu progresso permanentemente.")) {
-            localStorage.removeItem('neonCards_save');
+        if(confirm("Resetar tudo?")) {
+            localStorage.removeItem('neonHouse_save');
             location.reload();
         }
     }
 
-    // --- CORE FUNCTIONS ---
-
+    // --- CORE ---
     function init() {
         loadGame();
         startMarketTimer();
@@ -591,7 +565,19 @@
 
     function updateUI() {
         document.getElementById('coin-display').innerText = player.coins;
-        document.getElementById('inventory-count').innerText = player.inventory.length;
+        document.getElementById('level-display').innerText = player.level;
+        document.getElementById('home-level').innerText = player.level;
+        
+        const xpPercent = (player.xp / player.xpToNext) * 100;
+        document.getElementById('xp-bar').style.width = `${xpPercent}%`;
+        document.getElementById('xp-text').innerText = `${player.xp}/${player.xpToNext}`;
+
+        let rank = "Novato";
+        if(player.level > 5) rank = "Aprendiz";
+        if(player.level > 10) rank = "Guerreiro";
+        if(player.level > 20) rank = "Mestre";
+        if(player.level > 30) rank = "Lenda";
+        document.getElementById('home-rank').innerText = rank;
     }
 
     function showSection(id) {
@@ -601,7 +587,6 @@
         
         document.getElementById(id).classList.add('active');
         
-        // Nav Highlight Logic
         const navs = document.querySelectorAll('.nav-btn');
         if(id === 'home') navs[0].classList.add('active');
         if(id === 'shop') { navs[1].classList.add('active'); renderShop(); }
@@ -619,7 +604,7 @@
         toast.innerText = msg;
         if(type === 'success') toast.style.borderLeftColor = 'var(--success)';
         if(type === 'error') toast.style.borderLeftColor = 'var(--danger)';
-        if(type === 'rare') toast.style.borderLeftColor = 'var(--rarity-super)';
+        if(type === 'rare') toast.style.borderLeftColor = 'var(--rarity-mythic)';
         
         container.appendChild(toast);
         setTimeout(() => {
@@ -628,8 +613,35 @@
         }, 3000);
     }
 
-    // --- MARKET SYSTEM ---
+    // --- DAILY BONUS ---
+    function checkDaily() {
+        const now = Date.now();
+        const btn = document.getElementById('daily-btn');
+        if (now - player.lastDaily > 86400000) { 
+            btn.disabled = false;
+            btn.innerText = "RESGATAR";
+        } else {
+            btn.disabled = true;
+            const hoursLeft = Math.ceil((player.lastDaily + 86400000 - now) / 3600000);
+            btn.innerText = `ESPERE ${hoursLeft}h`;
+        }
+    }
 
+    window.claimDaily = function() {
+        const now = Date.now();
+        if (now - player.lastDaily > 86400000) {
+            player.lastDaily = now;
+            const reward = 200 + (player.level * 50);
+            player.coins += reward;
+            saveGame();
+            updateUI();
+            showToast(`Bônus Diário: ${reward}💰`, 'success');
+            playSound('win');
+            checkDaily();
+        }
+    }
+
+    // --- MARKET ---
     function initMarketPrices() {
         CARD_DB.forEach(card => {
             marketPrices[card.id] = card.type.basePrice;
@@ -639,10 +651,7 @@
 
     function startMarketTimer() {
         const timerEl = document.getElementById('market-timer');
-        
-        // Update immediately
         timerEl.innerText = marketTimer;
-
         marketInterval = setInterval(() => {
             marketTimer--;
             timerEl.innerText = marketTimer;
@@ -657,9 +666,8 @@
 
     function updateMarketPrices() {
         CARD_DB.forEach(card => {
-            const fluctuation = (Math.random() * 0.4) - 0.2; 
-            const newPrice = Math.floor(card.type.basePrice * (1 + fluctuation));
-            marketPrices[card.id] = Math.max(5, newPrice);
+            const fluctuation = (Math.random() * 0.5) - 0.25; 
+            marketPrices[card.id] = Math.max(5, Math.floor(card.type.basePrice * (1 + fluctuation)));
         });
         showToast("Mercado Atualizado!", "info");
         playSound('click');
@@ -676,21 +684,26 @@
 
         let hasCardsToSell = false;
 
-        // Render My Cards (Sell)
         [...player.inventory].forEach((id, index) => {
             hasCardsToSell = true;
             const card = CARD_DB.find(c => c.id === id);
-            const sellPrice = Math.floor(marketPrices[id] * 0.6); 
+            const sellPrice = Math.floor(marketPrices[id] * 0.4); // Reduced to 40%
             
             const div = document.createElement('div');
             div.className = `card ${card.type.class}`;
             div.innerHTML = `
                 <div class="card-bg-glow"></div>
                 <div class="card-header">
-                    <div class="card-rarity">${card.type.name}</div>
+                    <div class="card-badges">
+                        <span class="card-rarity">${card.type.name}</span>
+                        <span class="card-element ${card.element.class}">${card.element.name}</span>
+                    </div>
                     <span class="card-icon">${card.icon}</span>
                     <div class="card-name">${card.name}</div>
-                    <div class="card-power">⚔️ ${card.power}</div>
+                    <div class="card-stats">
+                        <span class="power-label">PODER</span>
+                        <span class="card-power">⚔️ ${card.power}</span>
+                    </div>
                 </div>
                 <button class="btn btn-sell" onclick="sellCard(${index})">Vender (${sellPrice}💰)</button>
             `;
@@ -700,7 +713,6 @@
         if (!hasCardsToSell) noCardsMsg.style.display = 'block';
         else noCardsMsg.style.display = 'none';
 
-        // Render Shop (Buy)
         CARD_DB.forEach(card => {
             const price = marketPrices[card.id];
             const owned = player.inventory.includes(card.id);
@@ -710,13 +722,19 @@
             div.innerHTML = `
                 <div class="card-bg-glow"></div>
                 <div class="card-header">
-                    <div class="card-rarity">${card.type.name}</div>
+                    <div class="card-badges">
+                        <span class="card-rarity">${card.type.name}</span>
+                        <span class="card-element ${card.element.class}">${card.element.name}</span>
+                    </div>
                     <span class="card-icon">${card.icon}</span>
                     <div class="card-name">${card.name}</div>
-                    <div class="card-power">⚔️ ${card.power}</div>
+                    <div class="card-stats">
+                        <span class="power-label">PODER</span>
+                        <span class="card-power">⚔️ ${card.power}</span>
+                    </div>
                 </div>
                 ${owned 
-                    ? `<div style="margin-top:auto; font-size:0.8rem; color:#94a3b8; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px;">Possuída</div>` 
+                    ? `<div style="margin-top:auto; font-size:0.7rem; color:#94a3b8; padding: 5px; background: rgba(0,0,0,0.5); border-radius: 5px;">Possuída</div>` 
                     : `<button class="btn btn-buy" onclick="buyCard(${card.id})">Comprar (${price}💰)</button>`
                 }
             `;
@@ -724,7 +742,6 @@
         });
     }
 
-    // Exposed to window for HTML onclick
     window.buyCard = function(id) {
         const price = marketPrices[id];
         if (player.coins >= price) {
@@ -743,8 +760,7 @@
 
     window.sellCard = function(index) {
         const id = player.inventory[index];
-        const price = Math.floor(marketPrices[id] * 0.6);
-        
+        const price = Math.floor(marketPrices[id] * 0.4);
         player.inventory.splice(index, 1);
         player.coins += price;
         updateUI();
@@ -760,9 +776,7 @@
         else input.value = val;
     }
 
-    // --- MINING SYSTEM ---
-    let currentDilemma = {};
-
+    // --- MINING ---
     window.startMining = function() {
         playSound('click');
         document.getElementById('mining-modal').style.display = 'flex';
@@ -775,21 +789,29 @@
     }
 
     function generateDilemma() {
-        const types = ['math', 'logic', 'sequence'];
+        const types = ['math', 'sequence', 'logic', 'color'];
         const type = types[Math.floor(Math.random() * types.length)];
-        let q = "", a = 0;
+        let q = "", a = "";
 
         if (type === 'math') {
-            const n1 = Math.floor(Math.random() * 50) + 10;
-            const n2 = Math.floor(Math.random() * 50) + 10;
+            const n1 = Math.floor(Math.random() * 100) + 10;
+            const n2 = Math.floor(Math.random() * 100) + 10;
             q = `Quanto é ${n1} + ${n2}?`;
-            a = n1 + n2;
+            a = (n1 + n2).toString();
+        } else if (type === 'sequence') {
+            const start = Math.floor(Math.random() * 10) + 1;
+            const step = Math.floor(Math.random() * 5) + 2;
+            q = `Sequência: ${start}, ${start+step}, ${start+(step*2)}, ... Qual o próximo?`;
+            a = (start + (step*3)).toString();
         } else if (type === 'logic') {
-            q = "Se ontem fosse amanhã, hoje seria sexta. Que dia é hoje? (1=Dom... 7=Sáb)";
-            a = 4; 
-        } else {
-            q = "Próximo número: 3, 6, 12, 24, ...";
-            a = 48;
+            q = "O pai de Maria tem 5 filhas: Lala, Lele, Lili, Lolo. Qual o nome da quinta?";
+            a = "Maria";
+        } else if (type === 'color') {
+            const colors = ['Vermelho', 'Azul', 'Verde', 'Amarelo'];
+            const c1 = colors[Math.floor(Math.random()*4)];
+            const c2 = colors[Math.floor(Math.random()*4)];
+            q = `Se Vermelho + Azul = Roxo. O que é ${c1} + ${c2}? (Responda a cor resultante ou 'Misto')`;
+            a = "Misto"; 
         }
 
         currentDilemma = { answer: a };
@@ -797,8 +819,10 @@
     }
 
     window.checkDilemma = function() {
-        const input = parseInt(document.getElementById('dilemma-answer').value);
-        if (input === currentDilemma.answer) {
+        const input = document.getElementById('dilemma-answer').value.trim().toLowerCase();
+        const correct = currentDilemma.answer.toString().toLowerCase();
+        
+        if (input === correct) {
             closeMining();
             processMiningResult();
         } else {
@@ -809,7 +833,8 @@
     }
 
     function processMiningResult() {
-        if (Math.random() < 0.4) {
+        const failChance = Math.max(0.2, 0.5 - (player.level * 0.02)); 
+        if (Math.random() < failChance) {
             showToast("Falha no Scanner!", 'error');
             playSound('lose');
             return;
@@ -817,37 +842,38 @@
 
         const rand = Math.random();
         let type = RARITY.NORMAL;
+        const levelBonus = player.level * 0.005;
         
-        if (rand > 0.98) type = RARITY.LEGENDARY;
-        else if (rand > 0.90) type = RARITY.SUPER;
-        else if (rand > 0.65) type = RARITY.RARE;
+        if (rand > 0.99 - levelBonus) type = RARITY.MYTHIC;
+        else if (rand > 0.95 - levelBonus) type = RARITY.LEGENDARY;
+        else if (rand > 0.85 - levelBonus) type = RARITY.SUPER;
+        else if (rand > 0.60) type = RARITY.RARE;
         
         const pool = CARD_DB.filter(c => c.type === type);
         const card = pool[Math.floor(Math.random() * pool.length)];
 
         if (player.inventory.includes(card.id)) {
-            const refund = Math.floor(card.type.basePrice * 0.2);
+            const refund = Math.floor(card.type.basePrice * 0.3);
             player.coins += refund;
             showToast(`Duplicata! Ganhou ${refund}💰`, 'info');
         } else {
             player.inventory.push(card.id);
-            showToast(`SUCESSO! ${card.name}`, 'rare');
+            showToast(`SUCESSO! ${card.name} (${type.name})`, 'rare');
             playSound('rare');
         }
         updateUI();
         saveGame();
     }
 
-    // --- BATTLE SYSTEM ---
-
+    // --- BATTLE (CASINO ALGORITHM) ---
     function renderBattleSelect() {
         const select = document.getElementById('battle-card-select');
-        select.innerHTML = '<option value="">Selecione uma carta...</option>';
+        select.innerHTML = '<option value="">Selecione...</option>';
         player.inventory.forEach(id => {
             const card = CARD_DB.find(c => c.id === id);
             const opt = document.createElement('option');
             opt.value = card.id;
-            opt.text = `${card.name} (Poder: ${card.power})`;
+            opt.text = `${card.name} [${card.element.name}] ⚔️${card.power}`;
             select.appendChild(opt);
         });
     }
@@ -882,23 +908,74 @@
         setTimeout(() => arena.style.opacity = 1, 50);
 
         const playerCard = CARD_DB.find(c => c.id == cardId);
-        const aiCard = CARD_DB[Math.floor(Math.random() * CARD_DB.length)];
+        
+        // --- THE HOUSE ALGORITHM ---
+        // 1. Find a counter-element card if possible
+        let aiCard = null;
+        const counterElementName = playerCard.element.beats; // The element that BEATS player's element
+        
+        if (counterElementName) {
+            // Try to find a card that has the counter element AND is strong enough
+            const counters = CARD_DB.filter(c => c.element.name === counterElementName && c.power >= playerCard.power * 0.8);
+            if (counters.length > 0) {
+                aiCard = counters[Math.floor(Math.random() * counters.length)];
+            }
+        }
+
+        // 2. If no counter, find a card with similar or higher power
+        if (!aiCard) {
+            const strongCards = CARD_DB.filter(c => c.power >= playerCard.power * 0.9 && c.power <= playerCard.power * 1.3);
+            if (strongCards.length > 0) {
+                aiCard = strongCards[Math.floor(Math.random() * strongCards.length)];
+            } else {
+                aiCard = CARD_DB[Math.floor(Math.random() * CARD_DB.length)]; // Fallback random
+            }
+        }
 
         document.getElementById('player-battle-card').innerHTML = createBattleCardHTML(playerCard);
         document.getElementById('ai-battle-card').innerHTML = createBattleCardHTML(aiCard);
 
         logBattle(`Apostando ${bet} moedas...`);
 
-        setTimeout(() => { logBattle("Analisando poderes..."); playSound('click'); }, 1000);
+        setTimeout(() => { logBattle("Analisando elementos..."); playSound('click'); }, 1000);
         setTimeout(() => { logBattle(`${playerCard.name} vs ${aiCard.name}!`); }, 2000);
         setTimeout(() => { logBattle("Troca de golpes..."); playSound('click'); }, 3000);
         
         setTimeout(() => {
             let result = "";
             let win = false;
+            let xpGain = 10;
 
-            const playerRoll = playerCard.power + Math.floor(Math.random() * 20);
-            const aiRoll = aiCard.power + Math.floor(Math.random() * 20);
+            // Elemental Logic
+            let elementBonus = 0;
+            let elementMsg = "";
+
+            if (playerCard.element.beats === aiCard.element.name) {
+                elementBonus = 30; 
+                elementMsg = "Vantagem Elemental!";
+            } else if (aiCard.element.beats === playerCard.element.name) {
+                elementBonus = -30; 
+                elementMsg = "Desvantagem Elemental!";
+            }
+
+            // --- RIGGED MATH ---
+            // Base rolls
+            let playerRoll = (playerCard.power + elementBonus) + Math.floor(Math.random() * 20);
+            let aiRoll = aiCard.power + Math.floor(Math.random() * 20);
+
+            // Streak Manipulation (The House Edge)
+            if (player.winStreak >= 3) {
+                // Player is on a hot streak, House fights back harder
+                aiRoll += 25; 
+                logBattle("A Casa está jogando sério...", 'neutral');
+            }
+            if (player.lossStreak >= 3) {
+                // Player is losing too much, give a pity boost
+                playerRoll += 25;
+                logBattle("Sorte do iniciante ativada!", 'neutral');
+            }
+
+            if (elementMsg) logBattle(elementMsg, 'neutral');
 
             if (playerRoll > aiRoll) {
                 win = true;
@@ -908,17 +985,34 @@
                 logBattle(result, 'win');
                 playSound('win');
                 showToast(result, 'success');
+                
+                player.winStreak++;
+                player.lossStreak = 0;
+                player.xp += xpGain;
+                
+                if(player.xp >= player.xpToNext) {
+                    player.level++;
+                    player.xp = 0;
+                    player.xpToNext = Math.floor(player.xpToNext * 1.2);
+                    showToast(`SUBIU DE NÍVEL! Agora é Nível ${player.level}`, 'rare');
+                    playSound('rare');
+                }
+
             } else {
                 result = `DERROTA! Perdeu ${bet}💰`;
                 logBattle(result, 'lose');
                 playSound('lose');
                 showToast(result, 'error');
+                
+                player.lossStreak++;
+                player.winStreak = 0;
+                player.xp += 2; 
             }
 
             updateUI();
             saveGame();
             btn.disabled = false;
-            btn.innerText = "⚔️ ENTRAR NA ARENA";
+            btn.innerText = "⚔️ LUTAR";
             
             setTimeout(() => {
                 arena.style.opacity = 0;
@@ -930,10 +1024,20 @@
 
     function createBattleCardHTML(card) {
         return `
-            <div class="card ${card.type.class}" style="transform: scale(0.85); height: 220px;">
-                <span class="card-icon">${card.icon}</span>
-                <div class="card-name">${card.name}</div>
-                <div class="card-power">⚔️ ${card.power}</div>
+            <div class="card ${card.type.class}" style="transform: scale(0.9); height: 240px;">
+                <div class="card-bg-glow"></div>
+                <div class="card-header">
+                    <div class="card-badges">
+                        <span class="card-rarity">${card.type.name}</span>
+                        <span class="card-element ${card.element.class}">${card.element.name}</span>
+                    </div>
+                    <span class="card-icon">${card.icon}</span>
+                    <div class="card-name">${card.name}</div>
+                    <div class="card-stats">
+                        <span class="power-label">PODER</span>
+                        <span class="card-power">⚔️ ${card.power}</span>
+                    </div>
+                </div>
             </div>
         `;
     }
@@ -950,10 +1054,16 @@
             if (owned) {
                 div.innerHTML = `
                     <div class="card-bg-glow"></div>
-                    <div class="card-rarity">${card.type.name}</div>
+                    <div class="card-badges">
+                        <span class="card-rarity">${card.type.name}</span>
+                        <span class="card-element ${card.element.class}">${card.element.name}</span>
+                    </div>
                     <span class="card-icon">${card.icon}</span>
                     <div class="card-name">${card.name}</div>
-                    <div class="card-power">⚔️ ${card.power}</div>
+                    <div class="card-stats">
+                        <span class="power-label">PODER</span>
+                        <span class="card-power">⚔️ ${card.power}</span>
+                    </div>
                 `;
             } else {
                 div.innerHTML = `
