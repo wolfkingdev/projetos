@@ -604,8 +604,8 @@
         .system-meta { font-size: 11px; gap: 15px; }
         .section-header { padding: 0 20px; flex-direction: column; align-items: stretch; }
         .search-bar { width: 100%; }
-        #library { padding: 30px 20px; gap: 16px; grid-template-columns: repeat(2, 1fr); }
-        .game-card, .add-card { width: 100%; height: auto; aspect-ratio: 3/4; }
+        #library { padding: 30px 20px; gap: 16px; grid-template-columns: repeat(2, 1fr); width: 100%; max-width: 100vw; overflow-x: hidden; align-content: start; grid-auto-rows: min-content; }
+        .game-card, .add-card { width: 100%; height: auto; aspect-ratio: 3/4; min-width: 0; position: relative; }
         .add-card { display: flex !important; }
         #store-overlay, #config-overlay { padding: 20px; }
         .store-grid { grid-template-columns: 1fr; }
@@ -616,7 +616,7 @@
     }
 
     @media (max-width: 480px) {
-        #library { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        #library { grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 20px 12px; align-content: start; }
         .game-card, .add-card { border-radius: 16px; }
         .card-badges { top: 8px; left: 8px; right: 8px; }
         .badge-new { font-size: 8px; padding: 4px 8px; }
@@ -923,21 +923,44 @@ return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
 const renderLibrary = async (searchTerm = '') => {
 const lib = document.getElementById('library');
 const empty = document.getElementById('library-empty');
-lib.innerHTML = '';
+	lib.innerHTML = '';
+	
+	try {
+	// 1. Criar e adicionar o card de ADICIONAR JOGO sempre em primeiro
+	const addCard = document.createElement('div');
+	addCard.className = 'add-card';
+	addCard.setAttribute('role', 'button');
+	addCard.setAttribute('aria-label', 'Adicionar novo jogo');
+	addCard.setAttribute('tabindex', '0');
+	addCard.onclick = openStore;
+	addCard.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openStore(); } };
+	addCard.innerHTML = `
+	<div class="add-icon-wrapper" aria-hidden="true">
+	<i data-lucide="plus"></i>
+	</div>
+	<span class="add-text">ADICIONAR JOGO</span>
+	`;
+	lib.appendChild(addCard);
 
-try {
-const games = await dbGetAll();
-installedGames = new Set(games.map(g => g.name.toLowerCase()));
+	const games = await dbGetAll();
+	installedGames = new Set(games.map(g => g.name.toLowerCase()));
+	
+	let filtered = games;
+	if (searchTerm) {
+	const term = searchTerm.toLowerCase();
+	filtered = games.filter(g => g.name?.toLowerCase().includes(term));
+	}
 
-let filtered = games;
-if (searchTerm) {
-const term = searchTerm.toLowerCase();
-filtered = games.filter(g => g.name?.toLowerCase().includes(term));
-}
-
-empty.style.display = filtered.length ? 'none' : 'block';
-
-for (const g of filtered) {
+	// 2. Ordenar: Favoritos primeiro, depois o resto
+	filtered.sort((a, b) => {
+	    if (a.favorite && !b.favorite) return -1;
+	    if (!a.favorite && b.favorite) return 1;
+	    return (b.installedAt || 0) - (a.installedAt || 0); // Recentes primeiro dentro do grupo
+	});
+	
+	empty.style.display = filtered.length ? 'none' : 'block';
+	
+	for (const g of filtered) {
 const card = document.createElement('div');
 card.className = 'game-card new-entry';
 card.tabIndex = 0;
@@ -945,18 +968,20 @@ card.dataset.gameName = g.name;
 card.setAttribute('role', 'listitem');
 card.setAttribute('aria-label', `Jogo: ${g.name}`);
 
-const hasImg = await checkImage(g.img);
-const newBadge = g.isNew ? '<div class="badge-new">NOVO</div>' : '';
-const dateStr = formatDate(g.installedAt);
+	const hasImg = await checkImage(g.img);
+	const newBadge = g.isNew ? '<div class="badge-new">NOVO</div>' : '';
+	const starIcon = g.favorite ? '<div class="badge-favorite" style="background:rgba(255,204,0,0.2); color:#ffcc00; padding:4px; border-radius:8px; display:flex; align-items:center; justify-content:center;"><i data-lucide="star" size="12" fill="currentColor"></i></div>' : '';
+	const dateStr = formatDate(g.installedAt);
 
 // === MENU DE TRÊS PONTOS: Visível em PC e Mobile, com todas as ações ===
 const menuId = `menu-${escapeHtml(g.name).replace(/[^a-zA-Z0-9]/g, '-')}`;
 card.innerHTML = `
 ${hasImg ? `<img class="card-image" src="${g.img}" alt="${escapeHtml(g.name)}" loading="lazy">` : `<i data-lucide="gamepad-2" class="main-icon" aria-hidden="true"></i>`}
 <div class="card-badges">
-<div class="badge-group-right">
-${newBadge}
-</div>
+	<div class="badge-group-right">
+	${starIcon}
+	${newBadge}
+	</div>
 </div>
 <!-- === BOTÃO TRÊS PONTOS: Sempre visível, todas as ações dentro === -->
 <button class="mobile-menu-btn" data-action="menu" aria-label="Mais opções" tabindex="-1">
@@ -1026,31 +1051,16 @@ actionsMenu.querySelectorAll('.mobile-action-item').forEach(item => {
     });
 });
 
-// Clique no card = jogar (exceto se clicou no menu)
-card.addEventListener('click', (e) => {
-    if (e.target.closest('.mobile-menu-btn') || e.target.closest('.mobile-actions-menu')) {
-        return;
-    }
-    launch(g.url, g.name);
-});
-}
-
-const addCard = document.createElement('div');
-addCard.className = 'add-card';
-addCard.setAttribute('role', 'button');
-addCard.setAttribute('aria-label', 'Adicionar novo jogo');
-addCard.setAttribute('tabindex', '0');
-addCard.onclick = openStore;
-addCard.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openStore(); } };
-addCard.innerHTML = `
-<div class="add-icon-wrapper" aria-hidden="true">
-<i data-lucide="plus"></i>
-</div>
-<span class="add-text">ADICIONAR JOGO</span>
-`;
-lib.appendChild(addCard);
-
-safeCreateIcons();
+	// Clique no card = jogar (exceto se clicou no menu)
+	card.addEventListener('click', (e) => {
+	    if (e.target.closest('.mobile-menu-btn') || e.target.closest('.mobile-actions-menu')) {
+	        return;
+	    }
+	    launch(g.url, g.name);
+	});
+	}
+	
+	safeCreateIcons();
 
 } catch (err) {
 console.error('[WKD OS] Erro ao renderizar:', err);
