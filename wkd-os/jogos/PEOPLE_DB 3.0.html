@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>◈ PEOPLE_DB // v3.0</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Fira+Code:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --green: #00ff41;
+    --green-dim: #00cc33;
+    --green-dark: #009926;
+    --green-glow: rgba(0, 255, 65, 0.3);
+    --green-glow2: rgba(0, 255, 65, 0.1);
+    --bg: #0a0a0a;
+    --bg2: #0f1a0f;
+    --bg3: #111;
+    --bg4: #1a1a1a;
+    --red: #ff3333;
+    --cyan: #00ffff;
+    --yellow: #ffff00;
+    --orange: #ff8800;
+    --purple: #bf5fff;
+    --pink: #ff5fff;
+    --border: #1a3a1a;
+    --text: #c0c0c0;
+    --text-dim: #666;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Fira Code', 'Share Tech Mono', monospace;
+    background: var(--bg);
+    color: var(--green);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,65,0.015) 2px, rgba(0,255,65,0.015) 4px);
+    pointer-events: none; z-index: 9999;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.4) 100%);
+    pointer-events: none; z-index: 9998;
+  }
+  #matrixBg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.06; }
+
+  /* LOCK SCREEN */
+  .lock-screen {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: var(--bg);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    animation: fadeIn 0.5s;
+  }
+  .lock-screen.hidden { display: none; }
+  
+  .lock-icon {
+    width: 80px;
+    height: 80px;
+    border: 3px solid var(--green);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    margin-bottom: 20px;
+    animation: pulse-border 2s infinite;
+    background: var(--green-glow2);
+    box-shadow: 0 0 30px var(--green-glow);
+  }
+  .lock-title {
+    font-size: 18px;
+    letter-spacing: 3px;
+    margin-bottom: 8px;
+    color: var(--green);
+  }
+  .lock-sub {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 30px;
+    letter-spacing: 1px;
+  }
+  .lock-input-wrap {
+    width: 100%;
+    max-width: 280px;
+    position: relative;
+    margin-bottom: 16px;
+  }
+  .lock-input {
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--bg2);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    color: var(--green);
+    font-family: inherit;
+    font-size: 18px;
+    text-align: center;
+    letter-spacing: 4px;
+    outline: none;
+    transition: all 0.3s;
+  }
+  .lock-input:focus { border-color: var(--green); box-shadow: 0 0 15px var(--green-glow); }
+  .lock-error {
+    color: var(--red);
+    font-size: 12px;
+    text-align: center;
+    margin-bottom: 20px;
+    min-height: 18px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .lock-error.show { opacity: 1; }
+  .lock-btn {
+    padding: 12px 40px;
+    background: var(--green);
+    color: var(--bg);
+    border: none;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .lock-btn:active { background: var(--green-dim); transform: scale(0.95); }
+  .lock-hint {
+    margin-top: 40px;
+    font-size: 10px;
+    color: var(--text-dim);
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  /* HEADER */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: linear-gradient(180deg, #0a0a0a 0%, #0a0a0a 80%, transparent 100%);
+    padding: 12px 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .logo { display: flex; align-items: center; gap: 8px; }
+  .logo-icon {
+    width: 32px; height: 32px;
+    border: 2px solid var(--green);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    animation: pulse-border 2s infinite;
+    background: var(--green-glow2);
+  }
+  @keyframes pulse-border {
+    0%, 100% { box-shadow: 0 0 5px var(--green-glow); }
+    50% { box-shadow: 0 0 15px var(--green-glow), 0 0 30px rgba(0,255,65,0.1); }
+  }
+  .logo-text { font-size: 14px; font-weight: 700; letter-spacing: 2px; color: var(--green); }
+  .logo-sub { font-size: 9px; color: var(--green-dim); letter-spacing: 1px; opacity: 0.7; }
+  .header-stats { display: flex; gap: 12px; align-items: center; }
+  .stat-badge {
+    font-size: 10px;
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--green-dim);
+    background: var(--green-glow2);
+  }
+  .stat-badge .num { color: var(--green); font-weight: 700; }
+  .header-actions { display: flex; gap: 8px; }
+  .header-btn {
+    width: 36px; height: 36px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg2);
+    color: var(--green-dim);
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .header-btn:active { border-color: var(--green); color: var(--green); }
+  .search-box { position: relative; margin-bottom: 4px; }
+  .search-box input {
+    width: 100%;
+    padding: 10px 12px 10px 36px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--green);
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    transition: all 0.3s;
+  }
+  .search-box input:focus { border-color: var(--green); box-shadow: 0 0 10px var(--green-glow); }
+  .search-box input::placeholder { color: var(--text-dim); }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; opacity: 0.5; }
+
+  /* TOOLBAR */
+  .main { padding: 8px 16px 100px; }
+  .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .toolbar-left { font-size: 10px; color: var(--text-dim); letter-spacing: 1px; }
+  .sort-select {
+    padding: 6px 28px 6px 10px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--green-dim);
+    font-family: inherit;
+    font-size: 10px;
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%2300cc33' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+  }
+  .sort-select option { background: var(--bg); color: var(--green); }
+
+  /* PERSON CARD */
+  .person-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: all 0.3s;
+    animation: cardIn 0.4s ease-out;
+  }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .person-card:active { transform: scale(0.98); }
+  .card-header {
+    display: flex; align-items: center; padding: 14px; gap: 12px; cursor: pointer; position: relative;
+  }
+  .card-header::after {
+    content: '▶'; position: absolute; right: 14px; font-size: 10px; color: var(--green-dim); transition: transform 0.3s;
+  }
+  .person-card.expanded .card-header::after { transform: rotate(90deg); }
+  .avatar {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    border: 2px solid var(--green-dark);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 700; color: var(--green); background: var(--green-glow2); flex-shrink: 0;
+  }
+  .card-info { flex: 1; min-width: 0; }
+  .card-name { font-size: 14px; font-weight: 600; color: var(--green); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-meta { font-size: 10px; color: var(--text-dim); display: flex; gap: 8px; flex-wrap: wrap; }
+  .card-meta span { display: flex; align-items: center; gap: 3px; }
+  .card-actions { display: flex; gap: 6px; margin-right: 28px; }
+  .card-btn {
+    width: 32px; height: 32px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg3);
+    color: var(--text-dim);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 12px; transition: all 0.2s; font-family: inherit;
+  }
+  .card-btn:active { border-color: var(--green); color: var(--green); }
+  .card-btn.danger:active { border-color: var(--red); color: var(--red); }
+
+  /* CARD BODY */
+  .card-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+  .person-card.expanded .card-body { max-height: 2000px; }
+  .card-body-inner { padding: 0 14px 14px; border-top: 1px solid var(--border); }
+  .detail-section { margin-top: 12px; }
+  .detail-section-title {
+    font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--green-dark);
+    margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+  }
+  .detail-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .detail-item { padding: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; }
+  .detail-item.full { grid-column: 1 / -1; }
+  .detail-label { font-size: 8px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 3px; }
+  .detail-value { font-size: 12px; color: var(--green); word-break: break-word; }
+  .detail-value.cyan { color: var(--cyan); }
+  .detail-value.yellow { color: var(--yellow); }
+  .detail-value.orange { color: var(--orange); }
+  .detail-value.purple { color: var(--purple); }
+  .detail-value.pink { color: var(--pink); }
+
+  .tag-list { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+  .tag { padding: 2px 8px; font-size: 9px; border-radius: 3px; border: 1px solid; letter-spacing: 0.5px; }
+  .tag.green { color: var(--green); border-color: var(--green-dark); background: rgba(0,255,65,0.05); }
+  .tag.cyan { color: var(--cyan); border-color: #006666; background: rgba(0,255,255,0.05); }
+  .tag.yellow { color: var(--yellow); border-color: #666600; background: rgba(255,255,0,0.05); }
+  .tag.orange { color: var(--orange); border-color: #664400; background: rgba(255,136,0,0.05); }
+  .tag.purple { color: var(--purple); border-color: #663399; background: rgba(191,95,255,0.05); }
+  .tag.pink { color: var(--pink); border-color: #993399; background: rgba(255,95,255,0.05); }
+  .tag.red { color: var(--red); border-color: #661111; background: rgba(255,51,51,0.05); }
+
+  /* FAB */
+  .fab {
+    position: fixed; bottom: 24px; right: 24px;
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: var(--green);
+    color: var(--bg);
+    border: none;
+    font-size: 28px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 0 20px var(--green-glow), 0 4px 15px rgba(0,0,0,0.5);
+    z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s; font-family: inherit;
+  }
+  .fab:active { transform: scale(0.9); box-shadow: 0 0 30px var(--green-glow); }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85); z-index: 500;
+    display: none; align-items: flex-end; justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.show { display: flex; animation: fadeIn 0.2s; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal {
+    width: 100%; max-width: 500px; max-height: 92vh;
+    background: var(--bg);
+    border: 1px solid var(--green-dark);
+    border-bottom: none;
+    border-radius: 16px 16px 0 0;
+    overflow: hidden;
+    animation: slideUp 0.3s ease-out;
+    display: flex; flex-direction: column;
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal-header {
+    padding: 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+  }
+  .modal-title { font-size: 14px; letter-spacing: 2px; color: var(--green); }
+  .modal-close {
+    width: 36px; height: 36px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg3);
+    color: var(--red);
+    font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-family: inherit; transition: all 0.2s;
+  }
+  .modal-close:active { border-color: var(--red); background: rgba(255,51,51,0.1); }
+  .modal-body {
+    padding: 16px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch;
+  }
+  .modal-body::-webkit-scrollbar { width: 4px; }
+  .modal-body::-webkit-scrollbar-track { background: var(--bg); }
+  .modal-body::-webkit-scrollbar-thumb { background: var(--green-dark); border-radius: 2px; }
+  .modal-footer {
+    padding: 12px 16px; border-top: 1px solid var(--border);
+    display: flex; gap: 8px; flex-shrink: 0; background: var(--bg2);
+  }
+
+  /* FORM */
+  .form-group { margin-bottom: 14px; }
+  .form-label {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--green-dim); margin-bottom: 6px;
+  }
+  .form-label .icon { font-size: 12px; }
+  .form-label .auto-badge {
+    font-size: 8px; padding: 1px 5px; background: var(--green-glow2);
+    border: 1px solid var(--green-dark); border-radius: 3px;
+    color: var(--green); letter-spacing: 0.5px;
+  }
+  .form-input {
+    width: 100%; padding: 10px 12px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--green);
+    font-family: inherit; font-size: 13px;
+    outline: none; transition: all 0.3s;
+  }
+  .form-input:focus { border-color: var(--green); box-shadow: 0 0 8px var(--green-glow); }
+  .form-input::placeholder { color: var(--text-dim); font-size: 11px; }
+  .form-input.auto-field { background: var(--bg); border-color: var(--green-dark); color: var(--cyan); font-weight: 600; }
+  textarea.form-input { min-height: 60px; resize: vertical; }
+  select.form-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2300ff41' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px;
+  }
+  select.form-input option { background: var(--bg); color: var(--green); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form-divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
+  .form-section-title {
+    font-size: 11px; letter-spacing: 2px; color: var(--green);
+    margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+  }
+  .form-section-title::before { content: '>'; color: var(--green); animation: blink 1s infinite; }
+  @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+  .custom-field {
+    display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px;
+    margin-bottom: 8px; animation: cardIn 0.3s;
+  }
+  .custom-field .form-input { font-size: 11px; padding: 8px 10px; }
+  .remove-field-btn {
+    width: 36px; height: 36px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg3);
+    color: var(--red);
+    font-size: 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-family: inherit; align-self: flex-start;
+    transition: all 0.2s;
+  }
+  .remove-field-btn:active { border-color: var(--red); background: rgba(255,51,51,0.1); }
+  .add-field-btn {
+    width: 100%; padding: 10px;
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--green-dim);
+    font-family: inherit; font-size: 11px; letter-spacing: 1px;
+    cursor: pointer; transition: all 0.3s; margin-top: 8px;
+  }
+  .add-field-btn:active { border-color: var(--green); color: var(--green); background: var(--green-glow2); }
+
+  .btn {
+    flex: 1; padding: 12px; border-radius: 6px;
+    font-family: inherit; font-size: 12px; letter-spacing: 1px; text-transform: uppercase;
+    cursor: pointer; transition: all 0.2s; border: 1px solid; text-align: center;
+  }
+  .btn-primary { background: var(--green); color: var(--bg); border-color: var(--green); font-weight: 700; }
+  .btn-primary:active { background: var(--green-dim); box-shadow: 0 0 15px var(--green-glow); }
+  .btn-secondary { background: transparent; color: var(--text-dim); border-color: var(--border); }
+  .btn-secondary:active { border-color: var(--green); color: var(--green); }
+  .btn-danger { background: transparent; color: var(--red); border-color: #661111; }
+  .btn-danger:active { background: rgba(255,51,51,0.1); }
+
+  /* SETTINGS MODAL */
+  .settings-section { margin-bottom: 24px; }
+  .settings-title {
+    font-size: 11px; letter-spacing: 2px; color: var(--green);
+    margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+  }
+  .settings-title::before { content: '>'; animation: blink 1s infinite; }
+  .settings-row {
+    display: flex; gap: 8px; margin-bottom: 10px; align-items: flex-end;
+  }
+  .settings-row .form-group { flex: 1; margin-bottom: 0; }
+  .file-input-wrap {
+    position: relative;
+    width: 100%;
+  }
+  .file-input-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px;
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    background: var(--bg2);
+    color: var(--green-dim);
+    font-family: inherit;
+    font-size: 11px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+  }
+  .file-input-label:active { border-color: var(--green); color: var(--green); background: var(--green-glow2); }
+  .file-input-label input[type="file"] {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
+    background: var(--bg2); border: 1px solid var(--green); border-radius: 8px;
+    padding: 10px 20px; font-family: inherit; font-size: 12px; color: var(--green);
+    z-index: 9999; transition: transform 0.3s ease;
+    box-shadow: 0 0 20px var(--green-glow); white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.error { border-color: var(--red); color: var(--red); box-shadow: 0 0 20px rgba(255,51,51,0.3); }
+
+  /* CONFIRM */
+  .confirm-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8); z-index: 600;
+    display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  .confirm-overlay.show { display: flex; }
+  .confirm-box {
+    background: var(--bg); border: 1px solid var(--red); border-radius: 12px;
+    padding: 24px; max-width: 320px; width: 100%; animation: fadeIn 0.2s;
+    box-shadow: 0 0 30px rgba(255,51,51,0.2);
+  }
+  .confirm-title { font-size: 14px; color: var(--red); margin-bottom: 8px; letter-spacing: 1px; }
+  .confirm-text { font-size: 12px; color: var(--text-dim); margin-bottom: 20px; line-height: 1.5; }
+  .confirm-actions { display: flex; gap: 8px; }
+  .confirm-actions .btn { font-size: 11px; padding: 10px; }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 60px 20px; animation: fadeIn 0.5s; }
+  .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.3; }
+  .empty-title { font-size: 14px; color: var(--green-dim); margin-bottom: 8px; letter-spacing: 1px; }
+  .empty-desc { font-size: 11px; color: var(--text-dim); line-height: 1.6; }
+
+  /* GLITCH */
+  .glitch { animation: glitch 3s infinite; }
+  @keyframes glitch {
+    0%, 95%, 100% { transform: none; opacity: 1; }
+    96% { transform: translateX(-2px) skewX(-1deg); opacity: 0.8; }
+    97% { transform: translateX(2px) skewX(1deg); opacity: 0.9; }
+    98% { transform: translateX(-1px); opacity: 0.7; }
+  }
+
+  .color-preview {
+    display: inline-block; width: 12px; height: 12px; border-radius: 50%;
+    vertical-align: middle; margin-right: 4px; border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  /* RESPONSIVE */
+  @media (min-width: 500px) {
+    .modal { border-radius: 16px; border-bottom: 1px solid var(--green-dark); margin-bottom: 4vh; max-height: 85vh; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="matrixBg"></canvas>
+<div class="toast" id="toast"></div>
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-title">⚠ CONFIRMAR EXCLUSÃO</div>
+    <div class="confirm-text" id="confirmText">Deseja realmente remover este registro?</div>
+    <div class="confirm-actions">
+      <button class="btn btn-secondary" onclick="closeConfirm()">CANCELAR</button>
+      <button class="btn btn-danger" id="confirmBtn" onclick="confirmAction()">EXCLUIR</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOCK SCREEN -->
+<div class="lock-screen" id="lockScreen">
+  <div class="lock-icon">🔒</div>
+  <div class="lock-title">ACCESS_DENIED</div>
+  <div class="lock-sub">Insira a credencial para acessar o sistema</div>
+  <div class="lock-input-wrap">
+    <input type="password" class="lock-input" id="lockInput" placeholder="••••••" maxlength="20" onkeydown="if(event.key==='Enter')unlockApp()">
+  </div>
+  <div class="lock-error" id="lockError">Credencial inválida</div>
+  <button class="lock-btn" onclick="unlockApp()">AUTENTICAR</button>
+  <div class="lock-hint">
+    Senha padrão: <span style="color:var(--green)">admin123</span><br>
+    <span style="opacity:0.5">Altere nas configurações após o primeiro acesso</span>
+  </div>
+</div>
+
+<!-- APP CONTENT -->
+<div class="header">
+  <div class="header-top">
+    <div class="logo">
+      <div class="logo-icon glitch">◈</div>
+      <div>
+        <div class="logo-text">PEOPLE_DB</div>
+        <div class="logo-sub">v3.0 // ENCRYPTED</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div class="header-stats">
+        <div class="stat-badge">TOTAL: <span class="num" id="totalCount">0</span></div>
+      </div>
+      <button class="header-btn" onclick="openSettings()" title="Configurações">⚙</button>
+    </div>
+  </div>
+  <div class="search-box">
+    <span class="search-icon">⌕</span>
+    <input type="text" id="searchInput" placeholder="Buscar por nome, cidade, tag..." oninput="renderPeople()">
+  </div>
+</div>
+
+<div class="main" id="mainContent">
+  <div class="toolbar">
+    <div class="toolbar-left" id="resultCount">0 registros encontrados</div>
+    <select class="sort-select" id="sortSelect" onchange="renderPeople()">
+      <option value="newest">Mais recentes</option>
+      <option value="oldest">Mais antigos</option>
+      <option value="name-asc">Nome A-Z</option>
+      <option value="name-desc">Nome Z-A</option>
+      <option value="age-asc">Mais jovem</option>
+      <option value="age-desc">Mais velho</option>
+    </select>
+  </div>
+  <div id="peopleList"></div>
+</div>
+
+<button class="fab" onclick="openModal()">+</button>
+
+<!-- MODAL ADD/EDIT -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">> NOVO_REGISTRO</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-section-title">DADOS_PESSOAIS</div>
+      <div class="form-group">
+        <label class="form-label"><span class="icon">👤</span> Nome Completo</label>
+        <input type="text" class="form-input" id="fNome" placeholder="Ex: João da Silva" autocomplete="off">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label"><span class="icon">📅</span> Nascimento <span class="auto-badge">AUTO</span></label>
+          <input type="date" class="form-input" id="fNascimento" onchange="calcAge()">
+        </div>
+        <div class="form-group">
+          <label class="form-label"><span class="icon">🎂</span> Idade <span class="auto-badge">AUTO</span></label>
+          <input type="text" class="form-input auto-field" id="fIdade" readonly placeholder="--">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label"><span class="icon">♈</span> Signo <span class="auto-badge">AUTO</span></label>
+          <input type="text" class="form-input auto-field" id="fSigno" readonly placeholder="--">
+        </div>
+        <div class="form-group">
+          <label class="form-label"><span class="icon">📱</span> Telefone</label>
+          <input type="tel" class="form-input" id="fTelefone" placeholder="(00) 00000-0000" oninput="maskPhone(this)">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label"><span class="icon">📧</span> Email</label>
+          <input type="email" class="form-input" id="fEmail" placeholder="email@exemplo.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label"><span class="icon">🌆</span> Cidade / UF</label>
+          <input type="text" class="form-input" id="fCidade" placeholder="São Paulo / SP">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label"><span class="icon">💼</span> Profissão</label>
+        <input type="text" class="form-input" id="fProfissao" placeholder="Ex: Desenvolvedor">
+      </div>
+
+      <hr class="form-divider">
+      <div class="form-section-title">PREFERÊNCIAS</div>
+      <div class="form-group">
+        <label class="form-label"><span class="icon">🍕</span> Comidas Favoritas (separar por vírgula)</label>
+        <input type="text" class="form-input" id="fComidas" placeholder="Pizza, Sushi, Hambúrguer">
+      </div>
+      <div class="form-group">
+        <label class="form-label"><span class="icon">🎨</span> Cores Favoritas (separar por vírgula)</label>
+        <input type="text" class="form-input" id="fCores" placeholder="Azul, Preto, Verde">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label"><span class="icon">🎬</span> Filme Favorito</label>
+          <input type="text" class="form-input" id="fFilme" placeholder="Matrix">
+        </div>
+        <div class="form-group">
+          <label class="form-label"><span class="icon">📺</span> Série Favorita</label>
+          <input type="text" class="form-input" id="fSerie" placeholder="Mr. Robot">
+        </div>
+      </div>
+
+      <hr class="form-divider">
+      <div class="form-section-title">INFO_ADICIONAL</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label"><span class="icon">🔗</span> Rede Social / Link</label>
+          <input type="text" class="form-input" id="fSocial" placeholder="@usuario ou URL">
+        </div>
+        <div class="form-group">
+          <label class="form-label"><span class="icon">🏷️</span> Tags (separar por vírgula)</label>
+          <input type="text" class="form-input" id="fTags" placeholder="amigo, trabalho, hacker">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label"><span class="icon">📝</span> Observações</label>
+        <textarea class="form-input" id="fObs" placeholder="Anotações livres sobre esta pessoa..."></textarea>
+      </div>
+
+      <hr class="form-divider">
+      <div class="form-section-title">CAMPOS_CUSTOMIZADOS</div>
+      <div id="customFields"></div>
+      <button class="add-field-btn" onclick="addCustomField()">+ ADICIONAR_CAMPO</button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">CANCELAR</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="savePerson()">SALVAR_REGISTRO</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settingsOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">> SISTEMA_CONFIG</div>
+      <button class="modal-close" onclick="closeSettings()">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- PASSWORD -->
+      <div class="settings-section">
+        <div class="settings-title">SEGURANÇA</div>
+        <div class="settings-row">
+          <div class="form-group">
+            <label class="form-label"><span class="icon">🔑</span> Nova Senha</label>
+            <input type="password" class="form-input" id="newPass" placeholder="Deixe vazio para manter">
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span class="icon">🔑</span> Confirmar</label>
+            <input type="password" class="form-input" id="confirmPass" placeholder="Confirme a nova senha">
+          </div>
+        </div>
+        <button class="btn btn-primary" style="margin-top:8px;" onclick="updatePassword()">ATUALIZAR_SENHA</button>
+        <button class="btn btn-danger" style="margin-top:8px;" onclick="removePassword()">REMOVER_SENHA</button>
+      </div>
+
+      <hr class="form-divider">
+
+      <!-- EXPORT -->
+      <div class="settings-section">
+        <div class="settings-title">EXPORTAR_DADOS</div>
+        <p style="font-size:11px;color:var(--text-dim);margin-bottom:10px;">Baixe o backup completo em arquivo .json</p>
+        <button class="btn btn-primary" onclick="exportJSON()">⬇ BAIXAR_ARQUIVO_JSON</button>
+      </div>
+
+      <!-- IMPORT -->
+      <div class="settings-section">
+        <div class="settings-title">IMPORTAR_DADOS</div>
+        <p style="font-size:11px;color:var(--text-dim);margin-bottom:10px;">Carregue um arquivo .json previamente exportado.<br><span style="color:var(--red)">⚠ Isso substituirá todos os dados atuais.</span></p>
+        <div class="file-input-wrap">
+          <label class="file-input-label">
+            📁 SELECIONAR_ARQUIVO_JSON
+            <input type="file" id="importFile" accept=".json,application/json" onchange="importJSON(this)">
+          </label>
+        </div>
+      </div>
+
+      <hr class="form-divider">
+
+      <!-- RESET -->
+      <div class="settings-section">
+        <div class="settings-title">REINICIALIZAR</div>
+        <button class="btn btn-danger" onclick="resetAll()">🗑 APAGAR_TUDO</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== DATA =====
+let people = JSON.parse(localStorage.getItem('people_db') || '[]');
+let editingId = null;
+let confirmCallback = null;
+let appPassword = localStorage.getItem('app_password') || 'admin123';
+let isAuthenticated = false;
+
+// ===== PASSWORD =====
+function unlockApp() {
+  const input = document.getElementById('lockInput').value;
+  if (!appPassword && input === '') {
+    enterApp();
+    return;
+  }
+  if (input === appPassword) {
+    enterApp();
+  } else {
+    document.getElementById('lockError').classList.add('show');
+    document.getElementById('lockInput').value = '';
+    setTimeout(() => document.getElementById('lockError').classList.remove('show'), 2000);
+  }
+}
+
+function enterApp() {
+  isAuthenticated = true;
+  document.getElementById('lockScreen').classList.add('hidden');
+  renderPeople();
+}
+
+function updatePassword() {
+  const newP = document.getElementById('newPass').value;
+  const confirmP = document.getElementById('confirmPass').value;
+  if (newP !== confirmP) {
+    showToast('⚠ SENHAS NÃO COINCIDEM', true);
+    return;
+  }
+  if (newP.length < 4) {
+    showToast('⚠ SENHA MUITO CURTA (MÍN 4 CARACTERES)', true);
+    return;
+  }
+  appPassword = newP;
+  localStorage.setItem('app_password', appPassword);
+  showToast('✓ SENHA ATUALIZADA COM SUCESSO');
+  document.getElementById('newPass').value = '';
+  document.getElementById('confirmPass').value = '';
+}
+
+function removePassword() {
+  showConfirm('Remover a senha de acesso? O app ficará aberto para qualquer pessoa.', () => {
+    appPassword = '';
+    localStorage.removeItem('app_password');
+    showToast('✓ SENHA REMOVIDA');
+    document.getElementById('newPass').value = '';
+    document.getElementById('confirmPass').value = '';
+  });
+}
+
+// ===== MATRIX BG =====
+const canvas = document.getElementById('matrixBg');
+const ctx = canvas.getContext('2d');
+function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEF';
+const fontSize = 14;
+let columns = Math.floor(canvas.width / fontSize);
+let drops = Array(columns).fill(1);
+function drawMatrix() {
+  ctx.fillStyle = 'rgba(0,0,0,0.05)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#00ff41';
+  ctx.font = fontSize + 'px monospace';
+  for (let i = 0; i < drops.length; i++) {
+    const text = chars[Math.floor(Math.random() * chars.length)];
+    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+    drops[i]++;
+  }
+}
+setInterval(drawMatrix, 50);
+
+// ===== ZODIAC =====
+function getSigno(dia, mes) {
+  const signos = [
+    [20,'Capricórnio','Aquário'],[19,'Aquário','Peixes'],[20,'Peixes','Áries'],
+    [20,'Áries','Touro'],[21,'Touro','Gêmeos'],[21,'Gêmeos','Câncer'],
+    [22,'Câncer','Leão'],[23,'Leão','Virgem'],[23,'Virgem','Libra'],
+    [23,'Libra','Escorpião'],[22,'Escorpião','Sagitário'],[21,'Sagitário','Capricórnio']
+  ];
+  const s = signos[mes - 1];
+  return dia <= s[0] ? s[1] : s[2];
+}
+function getSignoEmoji(signo) {
+  return {'Áries':'♈','Touro':'♉','Gêmeos':'♊','Câncer':'♋','Leão':'♌','Virgem':'♍','Libra':'♎','Escorpião':'♏','Sagitário':'♐','Capricórnio':'♑','Aquário':'♒','Peixes':'♓'}[signo] || '';
+}
+
+// ===== AGE =====
+function calcAge() {
+  const input = document.getElementById('fNascimento').value;
+  if (!input) return;
+  const birth = new Date(input);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  document.getElementById('fIdade').value = age + ' anos';
+  document.getElementById('fSigno').value = getSignoEmoji(getSigno(birth.getDate(), birth.getMonth() + 1)) + ' ' + getSigno(birth.getDate(), birth.getMonth() + 1);
+}
+
+// ===== MASK =====
+function maskPhone(el) {
+  let v = el.value.replace(/\D/g, '');
+  if (v.length > 11) v = v.slice(0, 11);
+  if (v.length > 6) v = `(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;
+  else if (v.length > 2) v = `(${v.slice(0,2)}) ${v.slice(2)}`;
+  else if (v.length > 0) v = `(${v}`;
+  el.value = v;
+}
+
+// ===== COLOR TAG =====
+function getColorTag(color) {
+  const c = color.trim();
+  if (!c) return '';
+  const lower = c.toLowerCase();
+  const colorMap = {
+    'vermelho':'#ff3333','red':'#ff3333','azul':'#3399ff','blue':'#3399ff',
+    'verde':'#00ff41','green':'#00ff41','amarelo':'#ffff00','yellow':'#ffff00',
+    'preto':'#999999','black':'#999999','branco':'#ffffff','white':'#ffffff',
+    'rosa':'#ff69b4','pink':'#ff69b4','roxo':'#bf5fff','purple':'#bf5fff',
+    'laranja':'#ff8800','orange':'#ff8800','cinza':'#888888','gray':'#888888','grey':'#888888',
+    'marrom':'#8B4513','brown':'#8B4513','ciano':'#00ffff','cyan':'#00ffff',
+    'dourado':'#ffd700','gold':'#ffd700','prata':'#c0c0c0','silver':'#c0c0c0',
+    'violeta':'#8a2be2','violet':'#8a2be2','índigo':'#4b0082','indigo':'#4b0082',
+    'bege':'#f5f5dc','beige':'#f5f5dc','coral':'#ff7f50','turquesa':'#40e0d0','turquoise':'#40e0d0',
+    'lilás':'#c8a2c8','lilac':'#c8a2c8','salmão':'#fa8072','salmon':'#fa8072',
+    'vinho':'#722f37','mostarda':'#ffdb58','oliva':'#808000','olive':'#808000'
+  };
+  let hex = colorMap[lower];
+  if (!hex) {
+    if (c.match(/^#[0-9a-f]{3,8}$/i)) return `<span class="color-preview" style="background:${c}"></span>${c}`;
+    let hash = 0;
+    for (let i = 0; i < c.length; i++) hash = c.charCodeAt(i) + ((hash << 5) - hash);
+    hex = `hsl(${Math.abs(hash) % 360}, 60%, 50%)`;
+  }
+  return `<span class="color-preview" style="background:${hex}"></span>${c}`;
+}
+
+// ===== SAVE DB =====
+function saveDB() { localStorage.setItem('people_db', JSON.stringify(people)); }
+
+// ===== TOAST =====
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isError ? ' error' : '');
+  setTimeout(() => t.className = 'toast', 2500);
+}
+
+// ===== CONFIRM =====
+function showConfirm(text, callback) {
+  document.getElementById('confirmText').textContent = text;
+  confirmCallback = callback;
+  document.getElementById('confirmOverlay').classList.add('show');
+}
+function closeConfirm() { document.getElementById('confirmOverlay').classList.remove('show'); confirmCallback = null; }
+function confirmAction() { if (confirmCallback) confirmCallback(); closeConfirm(); }
+
+// ===== MODAL =====
+function openModal(id = null) {
+  editingId = id;
+  document.getElementById('modalOverlay').classList.add('show');
+  document.getElementById('customFields').innerHTML = '';
+  if (id !== null) {
+    const p = people.find(x => x.id === id);
+    if (!p) return;
+    document.getElementById('modalTitle').textContent = '> EDITAR_REGISTRO #' + id;
+    document.getElementById('saveBtn').textContent = 'ATUALIZAR_REGISTRO';
+    document.getElementById('fNome').value = p.nome || '';
+    document.getElementById('fNascimento').value = p.nascimento || '';
+    document.getElementById('fTelefone').value = p.telefone || '';
+    document.getElementById('fEmail').value = p.email || '';
+    document.getElementById('fCidade').value = p.cidade || '';
+    document.getElementById('fProfissao').value = p.profissao || '';
+    document.getElementById('fComidas').value = (p.comidas || []).join(', ');
+    document.getElementById('fCores').value = (p.cores || []).join(', ');
+    document.getElementById('fFilme').value = p.filme || '';
+    document.getElementById('fSerie').value = p.serie || '';
+    document.getElementById('fSocial').value = p.social || '';
+    document.getElementById('fTags').value = (p.tags || []).join(', ');
+    document.getElementById('fObs').value = p.obs || '';
+    calcAge();
+    if (p.customFields) p.customFields.forEach(cf => addCustomField(cf.key, cf.value));
+  } else {
+    document.getElementById('modalTitle').textContent = '> NOVO_REGISTRO';
+    document.getElementById('saveBtn').textContent = 'SALVAR_REGISTRO';
+    ['fNome','fNascimento','fIdade','fSigno','fTelefone','fEmail','fCidade','fProfissao','fComidas','fCores','fFilme','fSerie','fSocial','fTags','fObs'].forEach(id => document.getElementById(id).value = '');
+  }
+  setTimeout(() => document.getElementById('fNome').focus(), 300);
+}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); editingId = null; }
+
+// ===== CUSTOM FIELDS =====
+let customFieldCount = 0;
+function addCustomField(key = '', value = '') {
+  const container = document.getElementById('customFields');
+  const idx = customFieldCount++;
+  const div = document.createElement('div');
+  div.className = 'custom-field';
+  div.id = `cf_${idx}`;
+  div.innerHTML = `
+    <input type="text" class="form-input cf-key" placeholder="Nome do campo" value="${key}">
+    <input type="text" class="form-input cf-value" placeholder="Valor" value="${value}">
+    <button class="remove-field-btn" onclick="this.parentElement.remove()">✕</button>
+  `;
+  container.appendChild(div);
+}
+
+// ===== SAVE PERSON =====
+function savePerson() {
+  const nome = document.getElementById('fNome').value.trim();
+  if (!nome) { showToast('⚠ NOME É OBRIGATÓRIO', true); document.getElementById('fNome').focus(); return; }
+  const nascimento = document.getElementById('fNascimento').value;
+  const comidas = document.getElementById('fComidas').value.split(',').map(s => s.trim()).filter(Boolean);
+  const cores = document.getElementById('fCores').value.split(',').map(s => s.trim()).filter(Boolean);
+  const tags = document.getElementById('fTags').value.split(',').map(s => s.trim()).filter(Boolean);
+  const customFields = [];
+  document.querySelectorAll('.custom-field').forEach(el => {
+    const key = el.querySelector('.cf-key').value.trim();
+    const value = el.querySelector('.cf-value').value.trim();
+    if (key) customFields.push({ key, value });
+  });
+  let idade = null, signo = null;
+  if (nascimento) {
+    const birth = new Date(nascimento);
+    const today = new Date();
+    idade = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) idade--;
+    signo = getSigno(birth.getDate(), birth.getMonth() + 1);
+  }
+  const person = {
+    id: editingId !== null ? editingId : Date.now(),
+    nome, nascimento, idade, signo,
+    telefone: document.getElementById('fTelefone').value.trim(),
+    email: document.getElementById('fEmail').value.trim(),
+    cidade: document.getElementById('fCidade').value.trim(),
+    profissao: document.getElementById('fProfissao').value.trim(),
+    comidas, cores, corFavorita: cores.length > 0 ? cores[0] : '',
+    filme: document.getElementById('fFilme').value.trim(),
+    serie: document.getElementById('fSerie').value.trim(),
+    social: document.getElementById('fSocial').value.trim(),
+    tags, obs: document.getElementById('fObs').value.trim(),
+    customFields,
+    criadoEm: editingId !== null ? (people.find(x => x.id === editingId)?.criadoEm || new Date().toISOString()) : new Date().toISOString(),
+    atualizadoEm: new Date().toISOString()
+  };
+  if (editingId !== null) {
+    const idx = people.findIndex(x => x.id === editingId);
+    if (idx > -1) people[idx] = person;
+    showToast('✓ REGISTRO ATUALIZADO');
+  } else {
+    people.push(person);
+    showToast('✓ REGISTRO ADICIONADO');
+  }
+  saveDB(); closeModal(); renderPeople();
+}
+
+// ===== DELETE =====
+function deletePerson(id) {
+  const p = people.find(x => x.id === id);
+  showConfirm(`Excluir registro de "${p?.nome}"?`, () => {
+    people = people.filter(x => x.id !== id);
+    saveDB(); renderPeople();
+    showToast('✓ REGISTRO EXCLUÍDO');
+  });
+}
+
+// ===== RENDER =====
+function renderPeople() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const sort = document.getElementById('sortSelect').value;
+  let filtered = people.filter(p => {
+    if (!search) return true;
+    return [
+      p.nome, p.email, p.cidade, p.profissao, p.filme, p.serie,
+      p.social, p.obs, p.telefone, p.signo,
+      ...(p.comidas || []), ...(p.cores || []), ...(p.tags || []),
+      ...(p.customFields || []).map(cf => cf.key + ' ' + cf.value)
+    ].join(' ').toLowerCase().includes(search);
+  });
+  filtered.sort((a, b) => {
+    switch (sort) {
+      case 'newest': return (b.id || 0) - (a.id || 0);
+      case 'oldest': return (a.id || 0) - (b.id || 0);
+      case 'name-asc': return (a.nome || '').localeCompare(b.nome || '');
+      case 'name-desc': return (b.nome || '').localeCompare(a.nome || '');
+      case 'age-asc': return (a.idade || 999) - (b.idade || 999);
+      case 'age-desc': return (b.idade || 0) - (a.idade || 0);
+      default: return 0;
+    }
+  });
+  document.getElementById('totalCount').textContent = people.length;
+  document.getElementById('resultCount').textContent = filtered.length + ' registro' + (filtered.length !== 1 ? 's' : '') + ' encontrado' + (filtered.length !== 1 ? 's' : '');
+  const list = document.getElementById('peopleList');
+  if (filtered.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⌧</div>
+        <div class="empty-title">${people.length === 0 ? 'NENHUM REGISTRO' : 'NENHUM RESULTADO'}</div>
+        <div class="empty-desc">${people.length === 0 ? 'Toque em + para catalogar sua primeira pessoa.\nO banco de dados está vazio.' : 'Tente ajustar sua busca.'}</div>
+      </div>
+    `;
+    return;
+  }
+  const tagColors = ['green','cyan','yellow','orange','purple','pink','red'];
+  list.innerHTML = filtered.map((p, i) => {
+    const initials = p.nome.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+    const criadoFormat = p.criadoEm ? new Date(p.criadoEm).toLocaleDateString('pt-BR') : '--';
+    const tagsHTML = (p.tags || []).slice(0, 4).map((t, j) => `<span class="tag ${tagColors[j % tagColors.length]}">${t}</span>`).join('');
+    let customHTML = '';
+    if (p.customFields && p.customFields.length > 0) {
+      customHTML = `<div class="detail-section"><div class="detail-section-title">CAMPOS_CUSTOM</div><div class="detail-grid">${p.customFields.map(cf => `<div class="detail-item full"><div class="detail-label">${cf.key}</div><div class="detail-value">${cf.value}</div></div>`).join('')}</div></div>`;
+    }
+    const coresHTML = (p.cores || []).map(c => getColorTag(c)).join('  ');
+    const comidasHTML = (p.comidas || []).join(', ');
+    return `
+      <div class="person-card" id="card_${p.id}" style="animation-delay:${i * 0.05}s">
+        <div class="card-header" onclick="toggleCard(${p.id})">
+          <div class="avatar">${initials}</div>
+          <div class="card-info">
+            <div class="card-name">${p.nome}</div>
+            <div class="card-meta">
+              ${p.idade !== null ? `<span>🎂 ${p.idade} anos</span>` : ''}
+              ${p.signo ? `<span>${getSignoEmoji(p.signo)} ${p.signo}</span>` : ''}
+              ${p.cidade ? `<span>📍 ${p.cidade}</span>` : ''}
+              <span>📅 ${criadoFormat}</span>
+            </div>
+          </div>
+          <div class="card-actions" onclick="event.stopPropagation()">
+            <button class="card-btn" onclick="openModal(${p.id})" title="Editar">✎</button>
+            <button class="card-btn danger" onclick="deletePerson(${p.id})" title="Excluir">✕</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-body-inner">
+            <div class="detail-section"><div class="detail-section-title">CONTATO</div><div class="detail-grid">
+              ${p.telefone ? `<div class="detail-item"><div class="detail-label">📱 Telefone</div><div class="detail-value">${p.telefone}</div></div>` : ''}
+              ${p.email ? `<div class="detail-item"><div class="detail-label">📧 Email</div><div class="detail-value cyan">${p.email}</div></div>` : ''}
+              ${p.cidade ? `<div class="detail-item"><div class="detail-label">🌆 Cidade</div><div class="detail-value">${p.cidade}</div></div>` : ''}
+              ${p.profissao ? `<div class="detail-item"><div class="detail-label">💼 Profissão</div><div class="detail-value yellow">${p.profissao}</div></div>` : ''}
+            </div></div>
+            <div class="detail-section"><div class="detail-section-title">PREFERÊNCIAS</div><div class="detail-grid">
+              ${comidasHTML ? `<div class="detail-item"><div class="detail-label">🍕 Comidas</div><div class="detail-value orange">${comidasHTML}</div></div>` : ''}
+              ${coresHTML ? `<div class="detail-item"><div class="detail-label">🎨 Cores</div><div class="detail-value purple">${coresHTML}</div></div>` : ''}
+              ${p.filme ? `<div class="detail-item"><div class="detail-label">🎬 Filme</div><div class="detail-value pink">${p.filme}</div></div>` : ''}
+              ${p.serie ? `<div class="detail-item"><div class="detail-label">📺 Série</div><div class="detail-value cyan">${p.serie}</div></div>` : ''}
+            </div></div>
+            ${p.social ? `<div class="detail-section"><div class="detail-section-title">SOCIAL</div><div class="detail-grid"><div class="detail-item full"><div class="detail-label">🔗 Rede / Link</div><div class="detail-value cyan">${p.social}</div></div></div></div>` : ''}
+            ${p.tags.length > 0 ? `<div class="detail-section"><div class="detail-section-title">TAGS</div><div class="tag-list">${tagsHTML}</div></div>` : ''}
+            ${p.obs ? `<div class="detail-section"><div class="detail-section-title">OBSERVAÇÕES</div><div class="detail-item full"><div class="detail-value" style="font-size:11px;line-height:1.5;color:var(--text)">${p.obs}</div></div></div>` : ''}
+            ${customHTML}
+            <div class="detail-section"><div class="detail-section-title">METADADOS</div><div class="detail-grid">
+              <div class="detail-item"><div class="detail-label">ID</div><div class="detail-value" style="font-size:10px;color:var(--text-dim)">#${p.id}</div></div>
+              <div class="detail-item"><div class="detail-label">Atualizado</div><div class="detail-value" style="font-size:10px;color:var(--text-dim)">${p.atualizadoEm ? new Date(p.atualizadoEm).toLocaleString('pt-BR') : '--'}</div></div>
+            </div></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleCard(id) { document.getElementById('card_' + id).classList.toggle('expanded'); }
+
+// ===== SETTINGS =====
+function openSettings() { document.getElementById('settingsOverlay').classList.add('show'); }
+function closeSettings() { document.getElementById('settingsOverlay').classList.remove('show'); }
+
+// ===== EXPORT JSON FILE =====
+function exportJSON() {
+  const dataStr = JSON.stringify(people, null, 2);
+  const blob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const date = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = `people_db_${date}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast(`✓ EXPORTADO: people_db_${date}.json`);
+}
+
+// ===== IMPORT JSON FILE =====
+function importJSON(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (!file.name.endsWith('.json')) {
+    showToast('⚠ ARQUIVO DEVE SER .JSON', true);
+    input.value = '';
+    return;
+  }
+  showConfirm(`Importar "${file.name}"? Isso substituirá todos os dados atuais.`, () => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (!Array.isArray(data)) throw new Error('Formato inválido');
+        const count = data.length;
+        people = data;
+        saveDB();
+        renderPeople();
+        closeSettings();
+        showToast(`✓ ${count} registro(s) importado(s) de ${file.name}`);
+      } catch (err) {
+        showToast('⚠ ERRO: ARQUIVO JSON INVÁLIDO', true);
+      }
+    };
+    reader.onerror = () => showToast('⚠ ERRO AO LER ARQUIVO', true);
+    reader.readAsText(file);
+  });
+  input.value = '';
+}
+
+// ===== RESET =====
+function resetAll() {
+  showConfirm('APAGAR TODOS OS DADOS? Esta ação é irreversível!', () => {
+    people = [];
+    saveDB();
+    renderPeople();
+    closeSettings();
+    showToast('✓ BANCO DE DADOS LIMPO');
+  });
+}
+
+// ===== KEYBOARD =====
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { closeModal(); closeSettings(); closeConfirm(); }
+});
+
+// ===== INIT =====
+if (!appPassword) {
+  document.getElementById('lockScreen').classList.add('hidden');
+  isAuthenticated = true;
+}
+renderPeople();
+
+// Sample data
+if (people.length === 0) {
+  people = [
+    {
+      id: 1001, nome: 'Neo Anderson', nascimento: '1995-03-11', idade: 31, signo: 'Peixes',
+      telefone: '(11) 99999-0001', email: 'neo@matrix.com', cidade: 'Zion / Mega City',
+      profissao: 'Hacker / Escolhido', comidas: ['Sushi', 'Ramen'], cores: ['Preto', 'Verde'],
+      corFavorita: 'Preto', filme: 'The Matrix', serie: 'Mr. Robot', social: '@the_one',
+      tags: ['hacker', 'protagonista', 'matrix'],
+      obs: 'Acredita que a realidade é uma simulação.',
+      customFields: [{ key: 'Nível de Acesso', value: 'ADMIN' }, { key: 'Status', value: 'ATIVO' }],
+      criadoEm: new Date().toISOString(), atualizadoEm: new Date().toISOString()
+    },
+    {
+      id: 1002, nome: 'Trinity Moss', nascimento: '1993-07-20', idade: 32, signo: 'Câncer',
+      telefone: '(11) 98888-0002', email: 'trinity@nebuchadnezzar.com', cidade: 'Zion',
+      profissao: 'Operadora de Sistemas', comidas: ['Pizza', 'Chocolate'],
+      cores: ['Vermelho', 'Preto', 'Roxo'], corFavorita: 'Vermelho',
+      filme: 'Blade Runner', serie: 'Dark', social: '@trinity_ops',
+      tags: ['hacker', 'aliada', 'matrix'],
+      obs: 'Especialista em sistemas de navegação.',
+      customFields: [], criadoEm: new Date(Date.now() - 86400000).toISOString(), atualizadoEm: new Date(Date.now() - 86400000).toISOString()
+    },
+    {
+      id: 1003, nome: 'Elliot Alderson', nascimento: '1990-10-05', idade: 35, signo: 'Libra',
+      telefone: '(21) 97777-0003', email: 'elliot@allsafe.com', cidade: 'New York / NY',
+      profissao: 'Engenheiro de Cybersecurity', comidas: ['Hambúrguer', 'Batata Frita', 'Refrigerante'],
+      cores: ['Preto', 'Cinza', 'Azul'], corFavorita: 'Preto',
+      filme: 'Fight Club', serie: 'Mr. Robot', social: '@elliot',
+      tags: ['hacker', 'fsociety', 'cybersecurity'],
+      obs: 'Sofre de ansiedade social. Brilhante mas instável.',
+      customFields: [{ key: 'Grupo', value: 'fsociety' }, { key: 'Skill Principal', value: 'Social Engineering' }],
+      criadoEm: new Date(Date.now() - 172800000).toISOString(), atualizadoEm: new Date(Date.now() - 172800000).toISOString()
+    }
+  ];
+  saveDB(); renderPeople();
+}
+</script>
+</body>
+</html>
