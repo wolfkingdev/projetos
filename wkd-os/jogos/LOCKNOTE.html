@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#050505">
+    <title>LOCKNOTE | Encrypted Vault</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        :root {
+            --bg: #050505;
+            --surface: #121212;
+            --surface-light: #1e1e1e;
+            --primary: #00f2ff;
+            --primary-dim: rgba(0, 242, 255, 0.1);
+            --danger: #ff4d4d;
+            --danger-dim: rgba(255, 77, 77, 0.15);
+            --text: #ffffff;
+            --text-dim: #888888;
+            --safe: #00ff88;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            height: 100dvh;
+            width: 100vw;
+            overflow: hidden;
+            position: fixed;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            padding: 
+                env(safe-area-inset-top, 20px) 
+                max(20px, env(safe-area-inset-left, 20px)) 
+                env(safe-area-inset-bottom, 20px) 
+                max(20px, env(safe-area-inset-right, 20px));
+            min-height: 0;
+        }
+
+        /* Screens & Transitions */
+        .screen { 
+            display: none; 
+            flex-direction: column; 
+            height: 100%; 
+            min-height: 0;
+            animation: fadeIn 0.3s ease-out;
+            overscroll-behavior: contain;
+        }
+        .active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Typography */
+        h1 { font-size: clamp(20px, 5vw, 24px); font-weight: 700; margin: 15px 0 5px; color: var(--primary); letter-spacing: -0.5px; }
+        p.subtitle { color: var(--text-dim); font-size: clamp(12px, 3.5vw, 14px); margin-bottom: 25px; }
+
+        /* Inputs */
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 11px; color: var(--primary); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        input, textarea {
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid #222;
+            color: white;
+            padding: 14px 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+            -webkit-appearance: none;
+        }
+        input:focus, textarea:focus { 
+            border-color: var(--primary); 
+            background: var(--surface-light); 
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 16px 20px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: transform 0.1s, opacity 0.1s;
+            width: 100%;
+            max-width: 100%;
+        }
+        .btn:active { transform: scale(0.98); opacity: 0.9; }
+        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); margin-top: 10px; }
+        .btn-danger { border-color: var(--danger); color: var(--danger); }
+
+        /* 🔐 Botão de logout discreto */
+        .btn-logout {
+            background: transparent;
+            color: var(--text-dim);
+            border: none;
+            padding: 10px;
+            font-size: 12px;
+            font-weight: 400;
+            margin: 0 auto;
+            width: auto;
+            opacity: 0.7;
+            transition: opacity 0.2s, color 0.2s;
+        }
+        .btn-logout:hover, .btn-logout:active {
+            opacity: 1;
+            color: var(--danger);
+        }
+
+        /* Notes List */
+        .notes-list { 
+            flex-grow: 1; 
+            overflow-y: auto; 
+            padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+            -webkit-overflow-scrolling: touch;
+        }
+        .note-card {
+            background: var(--surface);
+            padding: 16px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #222;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.1s, border-color 0.2s, box-shadow 0.2s;
+            user-select: none;
+        }
+        .note-card:active { transform: scale(0.995); }
+        
+        /* Feedback visual para long-press */
+        .note-card.hold-active {
+            border-color: var(--danger);
+            box-shadow: 0 0 0 2px var(--danger-dim);
+        }
+        .note-card.hold-active .hold-progress {
+            opacity: 1;
+        }
+        .hold-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: var(--danger);
+            width: 0%;
+            transition: width 0.1s linear;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .hold-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--danger);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s;
+            white-space: nowrap;
+            z-index: 2;
+        }
+        .note-card.hold-active .hold-hint {
+            opacity: 1;
+        }
+
+        .note-info { flex: 1; min-width: 0; position: relative; z-index: 1; }
+        .note-info h3 { margin: 0; font-size: 15px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .note-info span { font-size: 10px; color: var(--safe); background: rgba(0,255,136,0.1); padding: 2px 6px; border-radius: 4px; }
+
+        /* Security HUD */
+        .status-bar {
+            background: var(--primary-dim);
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 11px;
+            text-align: center;
+            margin-bottom: 15px;
+            border: 1px solid var(--primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .attempts-alert {
+            color: var(--danger);
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 10px;
+            margin-top: 10px;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        /* FAB - Botão Flutuante */
+        .fab {
+            position: fixed;
+            bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+            right: calc(20px + env(safe-area-inset-right, 0px));
+            width: 60px;
+            height: 60px;
+            border-radius: 18px;
+            background: var(--primary);
+            box-shadow: 0 8px 24px rgba(0, 242, 255, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            color: #000;
+            z-index: 100;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .fab:active { transform: scale(0.95); }
+
+        /* Editor textarea */
+        #screen-editor .input-group:last-of-type {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        #note-content {
+            flex-grow: 1;
+            resize: none;
+            min-height: 120px;
+            line-height: 1.5;
+        }
+
+        /* Ajustes para telas muito pequenas */
+        @media (max-height: 650px) {
+            h1 { margin: 10px 0 5px; font-size: 20px; }
+            p.subtitle { margin-bottom: 20px; font-size: 12px; }
+            .btn { padding: 14px; font-size: 15px; }
+            .fab { width: 56px; height: 56px; font-size: 26px; }
+        }
+
+        @media (max-width: 360px) {
+            .app-container { padding: env(safe-area-inset-top, 15px) 15px env(safe-area-inset-bottom, 15px) 15px; }
+            .note-card { padding: 14px; }
+            .btn { padding: 14px 16px; font-size: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Scripts de otimização mobile -->
+<script>
+    document.addEventListener('touchstart', function(){}, {passive: true});
+    document.body.addEventListener('touchmove', function(e) {
+        if (e.target.closest('.notes-list') || e.target.closest('textarea')) {
+            e.stopPropagation();
+        }
+    }, {passive: false});
+</script>
+
+<div class="app-container">
+    
+    <div id="screen-auth" class="screen active" style="justify-content: center;">
+        <div style="text-align: center; margin-bottom: 40px;">
+            <div style="font-size: 50px; margin-bottom: 10px;">🔐</div>
+            <h1 id="auth-title">LOCKNOTE</h1>
+            <p class="subtitle">Acesso Restrito & Criptografado</p>
+        </div>
+        
+        <div class="input-group">
+            <input type="password" id="master-pass" placeholder="Chave Mestra" autofocus autocomplete="off">
+        </div>
+        <button class="btn" onclick="handleAuth()">DESBLOQUEAR COFRE</button>
+        <div id="attempts-info" class="attempts-alert"></div>
+    </div>
+
+    <div id="screen-main" class="screen">
+        <header>
+            <h1>LOCKNOTE</h1>
+            <p class="subtitle">Criptografia AES-256</p>
+        </header>
+
+        <div class="status-bar">PROTEÇÃO MAXIMA</div>
+
+        <div id="notes-list" class="notes-list"></div>
+
+        <div class="fab" onclick="showEditor()">+</div>
+        
+        <div style="text-align: center; padding-top: 10px;">
+            <button class="btn-logout" onclick="location.reload()">Encerrar sessão</button>
+        </div>
+    </div>
+
+    <div id="screen-editor" class="screen">
+        <header>
+            <h1 id="editor-title">Nova Entrada</h1>
+            <p class="subtitle">Defina chaves únicas para máxima segurança</p>
+        </header>
+
+        <div class="input-group">
+            <label>Título do Arquivo</label>
+            <input type="text" id="note-title" placeholder="Ex: Códigos de Acesso" autocomplete="off">
+        </div>
+
+        <div class="input-group">
+            <label>Chave Individual da Nota</label>
+            <input type="password" id="note-pass" placeholder="Senha de proteção de camada 2" autocomplete="new-password">
+        </div>
+
+        <div class="input-group" style="flex-grow: 1; display: flex; flex-direction: column;">
+            <label>Conteúdo</label>
+            <textarea id="note-content" placeholder="Escreva aqui seu segredo..." style="flex-grow: 1; resize: none;"></textarea>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0;">
+            <button class="btn btn-outline" onclick="showMain()" style="margin:0">VOLTAR</button>
+            <button class="btn" onclick="saveNote()" style="margin:0">SALVAR</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let MASTER_KEY = "";
+    let ATTEMPTS = parseInt(localStorage.getItem('sn_attempts')) || 0;
+    const MAX_ATTEMPTS = 2;
+    const LONG_PRESS_DURATION = 700; // ms para detectar long-press
+
+    // Estado para controle de long-press
+    let longPressTimer = null;
+    let longPressNoteId = null;
+    let longPressStartPos = null;
+
+    if(!localStorage.getItem('sn_vault')) {
+        document.getElementById('auth-title').innerText = "Criar Cofre";
+    }
+
+    function handleAuth() {
+        const pass = document.getElementById('master-pass').value;
+        const vault = localStorage.getItem('sn_vault');
+
+        if(!vault) {
+            const check = CryptoJS.AES.encrypt("OFFLINE_VALID", pass).toString();
+            localStorage.setItem('sn_vault', JSON.stringify([]));
+            localStorage.setItem('sn_check', check);
+            loginSuccess(pass);
+        } else {
+            try {
+                const check = localStorage.getItem('sn_check');
+                const dec = CryptoJS.AES.decrypt(check, pass).toString(CryptoJS.enc.Utf8);
+                if(dec === "OFFLINE_VALID") loginSuccess(pass);
+                else failAuth();
+            } catch(e) { failAuth(); }
+        }
+    }
+
+    function failAuth() {
+        ATTEMPTS++;
+        localStorage.setItem('sn_attempts', ATTEMPTS);
+        if(ATTEMPTS >= MAX_ATTEMPTS) {
+            localStorage.clear();
+            alert("⚠️ PROTOCOLO DE AUTODESTRUIÇÃO EXECUTADO. Todos os dados foram apagados.");
+            location.reload();
+        } else {
+            document.getElementById('attempts-info').innerText = `ERRO: ${ATTEMPTS}/${MAX_ATTEMPTS} TENTATIVAS ANTES DO WIPEOUT`;
+        }
+    }
+
+    function loginSuccess(pass) {
+        MASTER_KEY = pass;
+        localStorage.setItem('sn_attempts', 0);
+        document.getElementById('master-pass').value = '';
+        switchScreen('screen-main');
+        renderNotes();
+    }
+
+    function saveNote() {
+        const title = document.getElementById('note-title').value;
+        const nPass = document.getElementById('note-pass').value;
+        const content = document.getElementById('note-content').value;
+
+        if(!nPass || !title) return alert("Título e Senha da nota são obrigatórios.");
+
+        const encryptedData = CryptoJS.AES.encrypt(content, nPass).toString();
+        const noteObj = {
+            id: Date.now(),
+            title: CryptoJS.AES.encrypt(title, MASTER_KEY).toString(),
+            data: encryptedData
+        };
+
+        let notes = [];
+        try {
+            notes = JSON.parse(localStorage.getItem('sn_vault')) || [];
+        } catch(e) {}
+        
+        notes.push(noteObj);
+        localStorage.setItem('sn_vault', JSON.stringify(notes));
+        showMain();
+    }
+
+    // Função para iniciar o long-press
+    function startLongPress(noteId, card) {
+        // Salva posição inicial para detectar movimento excessivo
+        longPressStartPos = { x: window.event?.clientX || window.event?.touches?.[0]?.clientX, 
+                              y: window.event?.clientY || window.event?.touches?.[0]?.clientY };
+        
+        longPressNoteId = noteId;
+        card.classList.add('hold-active');
+        
+        const progress = card.querySelector('.hold-progress');
+        progress.style.width = '0%';
+        
+        let elapsed = 0;
+        const interval = 50;
+        
+        longPressTimer = setInterval(() => {
+            elapsed += interval;
+            const percent = Math.min(100, (elapsed / LONG_PRESS_DURATION) * 100);
+            progress.style.width = percent + '%';
+            
+            if(elapsed >= LONG_PRESS_DURATION) {
+                clearInterval(longPressTimer);
+                triggerDelete(noteId, card);
+            }
+        }, interval);
+    }
+
+    // Função para cancelar o long-press
+    function cancelLongPress(card) {
+        if(longPressTimer) {
+            clearInterval(longPressTimer);
+            longPressTimer = null;
+        }
+        if(card) {
+            card.classList.remove('hold-active');
+            const progress = card.querySelector('.hold-progress');
+            if(progress) progress.style.width = '0%';
+        }
+        longPressNoteId = null;
+        longPressStartPos = null;
+    }
+
+    // Função para verificar se houve movimento excessivo (para não acionar ao rolar a página)
+    function isSignificantMove(currentX, currentY) {
+        if(!longPressStartPos) return false;
+        const dx = Math.abs(currentX - longPressStartPos.x);
+        const dy = Math.abs(currentY - longPressStartPos.y);
+        return dx > 15 || dy > 15; // tolerância de 15px
+    }
+
+    // Função que executa a exclusão após long-press bem-sucedido
+    function triggerDelete(noteId, card) {
+        cancelLongPress(card);
+        
+        // Vibração haptica se suportado (mobile)
+        if(navigator.vibrate) navigator.vibrate(100);
+        
+        const confirmPass = prompt("⚠️ CONFIRMAÇÃO DE EXCLUSÃO\n\nDigite sua CHAVE MESTRA para excluir esta nota permanentemente:");
+        
+        if(!confirmPass) return;
+        
+        // Verifica se a senha está correta
+        try {
+            const check = localStorage.getItem('sn_check');
+            const dec = CryptoJS.AES.decrypt(check, confirmPass).toString(CryptoJS.enc.Utf8);
+            
+            if(dec !== "OFFLINE_VALID") {
+                alert("❌ Senha incorreta. Exclusão cancelada.");
+                return;
+            }
+        } catch(e) {
+            alert("❌ Erro na verificação. Exclusão cancelada.");
+            return;
+        }
+        
+        // Exclui a nota
+        let notes = [];
+        try {
+            notes = JSON.parse(localStorage.getItem('sn_vault')) || [];
+        } catch(e) {}
+        
+        const newNotes = notes.filter(n => n.id !== noteId);
+        localStorage.setItem('sn_vault', JSON.stringify(newNotes));
+        
+        // Feedback visual de sucesso
+        if(navigator.vibrate) navigator.vibrate([50, 50, 50]);
+        card.style.opacity = '0';
+        card.style.transform = 'scale(0.9)';
+        setTimeout(() => {
+            renderNotes();
+        }, 200);
+    }
+
+    // Configura os eventos de long-press em um card
+    function setupLongPressEvents(card, noteId) {
+        // Previne menu contextual no mobile
+        card.addEventListener('contextmenu', (e) => e.preventDefault());
+        
+        // Eventos para touch (mobile)
+        card.addEventListener('touchstart', (e) => {
+            // Só ativa se não estiver tocando no botão "ABRIR"
+            if(e.target.closest('button')) return;
+            e.preventDefault(); // Previne scroll durante o hold
+            startLongPress(noteId, card);
+        }, {passive: false});
+        
+        card.addEventListener('touchmove', (e) => {
+            if(longPressTimer && isSignificantMove(e.touches[0].clientX, e.touches[0].clientY)) {
+                cancelLongPress(card);
+            }
+        }, {passive: true});
+        
+        card.addEventListener('touchend', () => {
+            if(longPressNoteId === noteId) {
+                cancelLongPress(card);
+            }
+        }, {passive: true});
+        
+        card.addEventListener('touchcancel', () => {
+            cancelLongPress(card);
+        });
+        
+        // Eventos para mouse (desktop)
+        card.addEventListener('mousedown', (e) => {
+            if(e.target.closest('button')) return;
+            startLongPress(noteId, card);
+        });
+        
+        card.addEventListener('mousemove', (e) => {
+            if(longPressTimer && isSignificantMove(e.clientX, e.clientY)) {
+                cancelLongPress(card);
+            }
+        });
+        
+        card.addEventListener('mouseup', () => {
+            if(longPressNoteId === noteId) {
+                cancelLongPress(card);
+            }
+        });
+        
+        card.addEventListener('mouseleave', () => {
+            cancelLongPress(card);
+        });
+    }
+
+    function renderNotes() {
+        const list = document.getElementById('notes-list');
+        let notes = [];
+        try {
+            notes = JSON.parse(localStorage.getItem('sn_vault')) || [];
+        } catch(e) {}
+        
+        list.innerHTML = notes.length === 0 ? '<div style="text-align:center; color:#555; margin-top:50px;">Cofre Vazio</div>' : "";
+
+        notes.forEach(n => {
+            let title;
+            try { title = CryptoJS.AES.decrypt(n.title, MASTER_KEY).toString(CryptoJS.enc.Utf8); } 
+            catch(e) { title = "Encerrado"; }
+
+            const card = document.createElement('div');
+            card.className = 'note-card';
+            card.innerHTML = `
+                <div class="note-info">
+                    <h3>${title}</h3>
+                    <span>AES-256 L2</span>
+                </div>
+                <button class="btn" style="padding: 10px 20px; font-size: 12px; width: auto; min-width: 80px; position: relative; z-index: 2;" onclick="viewNote(${n.id})">ABRIR</button>
+                <div class="hold-progress"></div>
+                <div class="hold-hint">Segure para excluir</div>
+            `;
+            
+            // Configura eventos de long-press
+            setupLongPressEvents(card, n.id);
+            
+            list.appendChild(card);
+        });
+    }
+
+    function viewNote(id) {
+        // Cancela qualquer long-press pendente ao clicar para abrir
+        if(longPressTimer) {
+            clearInterval(longPressTimer);
+            longPressTimer = null;
+        }
+        
+        const notes = JSON.parse(localStorage.getItem('sn_vault'));
+        const n = notes.find(x => x.id === id);
+        const pass = prompt("Digite a CHAVE INDIVIDUAL desta nota:");
+        
+        if(!pass) return;
+        try {
+            const dec = CryptoJS.AES.decrypt(n.data, pass).toString(CryptoJS.enc.Utf8);
+            if(!dec) throw new Error();
+            
+            document.getElementById('note-title').value = CryptoJS.AES.decrypt(n.title, MASTER_KEY).toString(CryptoJS.enc.Utf8);
+            document.getElementById('note-content').value = dec;
+            document.getElementById('note-pass').value = "PROTEGIDO";
+            document.getElementById('editor-title').innerText = "Editar Entrada";
+            switchScreen('screen-editor');
+        } catch(e) { alert("Chave incorreta. Acesso negado."); }
+    }
+
+    function showMain() { 
+        document.getElementById('editor-title').innerText = "Nova Entrada";
+        switchScreen('screen-main'); 
+        renderNotes(); 
+    }
+    
+    function showEditor() {
+        document.getElementById('note-title').value = "";
+        document.getElementById('note-pass').value = "";
+        document.getElementById('note-content').value = "";
+        document.getElementById('editor-title').innerText = "Nova Entrada";
+        switchScreen('screen-editor');
+    }
+    
+    function switchScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    // Previne submit por Enter no campo de senha
+    document.getElementById('master-pass')?.addEventListener('keypress', function(e) {
+        if(e.key === 'Enter') handleAuth();
+    });
+    
+    // Limpa timers ao mudar de tela para evitar vazamento de memória
+    document.addEventListener('visibilitychange', () => {
+        if(document.hidden && longPressTimer) {
+            clearInterval(longPressTimer);
+            longPressTimer = null;
+        }
+    });
+</script>
+
+</body>
+</html>
