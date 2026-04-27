@@ -1,0 +1,1963 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a0f">
+<title>⚡ NeonVault</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --neon-cyan: #00f0ff;
+    --neon-pink: #ff00aa;
+    --neon-purple: #b000ff;
+    --neon-green: #00ff88;
+    --neon-red: #ff0044;
+    --neon-yellow: #ffe600;
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-tertiary: #1a1a2e;
+    --bg-card: rgba(255,255,255,0.03);
+    --bg-card-hover: rgba(255,255,255,0.06);
+    --text-primary: #e8e8f0;
+    --text-secondary: #8888aa;
+    --text-muted: #555570;
+    --border-color: rgba(255,255,255,0.06);
+    --border-glow: rgba(0,240,255,0.15);
+    --glass-bg: rgba(15,15,25,0.85);
+    --shadow-neon: 0 0 20px rgba(0,240,255,0.15), 0 0 60px rgba(0,240,255,0.05);
+    --shadow-pink: 0 0 20px rgba(255,0,170,0.15), 0 0 60px rgba(255,0,170,0.05);
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * {
+    margin: 0; padding: 0; box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  *::selection {
+    background: rgba(0,240,255,0.2);
+    color: #fff;
+  }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      radial-gradient(ellipse 600px 400px at 20% 10%, rgba(0,240,255,0.04) 0%, transparent 70%),
+      radial-gradient(ellipse 500px 350px at 80% 80%, rgba(176,0,255,0.04) 0%, transparent 70%),
+      radial-gradient(ellipse 400px 300px at 50% 50%, rgba(255,0,170,0.02) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .screen {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    flex-direction: column;
+    z-index: 1;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    overflow: hidden;
+  }
+
+  .screen.hidden {
+    opacity: 0;
+    transform: scale(0.96);
+    pointer-events: none;
+  }
+
+  .screen.slide-left {
+    transform: translateX(-100%);
+  }
+
+  .screen.slide-right {
+    transform: translateX(100%);
+  }
+
+  /* ===== AUTH SCREEN ===== */
+  #authScreen {
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background:
+      radial-gradient(ellipse 800px 600px at 50% 30%, rgba(0,240,255,0.03) 0%, transparent 60%),
+      var(--bg-primary);
+  }
+
+  .auth-container {
+    width: 100%;
+    max-width: 380px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+  }
+
+  .auth-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+
+  .auth-logo-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    box-shadow:
+      0 0 30px rgba(0,240,255,0.25),
+      0 0 80px rgba(0,240,255,0.08),
+      inset 0 0 20px rgba(255,255,255,0.1);
+    animation: logoPulse 3s ease-in-out infinite;
+    position: relative;
+  }
+
+  .auth-logo-icon::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    border-top-color: var(--neon-cyan);
+    border-right-color: var(--neon-pink);
+    animation: logoSpin 4s linear infinite;
+  }
+
+  @keyframes logoPulse {
+    0%, 100% { box-shadow: 0 0 30px rgba(0,240,255,0.25), 0 0 80px rgba(0,240,255,0.08); }
+    50% { box-shadow: 0 0 40px rgba(0,240,255,0.35), 0 0 100px rgba(0,240,255,0.12); }
+  }
+
+  @keyframes logoSpin {
+    to { transform: rotate(360deg); }
+  }
+
+  .auth-title {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .auth-subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-align: center;
+    line-height: 1.5;
+    letter-spacing: 0.3px;
+  }
+
+  .auth-card {
+    width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 28px 24px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .auth-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+    opacity: 0.5;
+  }
+
+  .input-group {
+    margin-bottom: 18px;
+  }
+
+  .input-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+
+  .input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .input-field {
+    width: 100%;
+    height: 52px;
+    background: var(--bg-tertiary);
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0 48px 0 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    color: var(--text-primary);
+    outline: none;
+    transition: var(--transition);
+    letter-spacing: 2px;
+  }
+
+  .input-field:focus {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 0 3px rgba(0,240,255,0.1), var(--shadow-neon);
+  }
+
+  .input-field.error {
+    border-color: var(--neon-red);
+    box-shadow: 0 0 0 3px rgba(255,0,68,0.1);
+    animation: inputShake 0.5s ease;
+  }
+
+  .input-field.success {
+    border-color: var(--neon-green);
+    box-shadow: 0 0 0 3px rgba(0,255,136,0.1);
+  }
+
+  @keyframes inputShake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+
+  .input-toggle {
+    position: absolute;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+    font-size: 18px;
+  }
+
+  .input-toggle:active {
+    background: var(--bg-card-hover);
+    color: var(--text-primary);
+  }
+
+  .error-message {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--neon-red);
+    font-weight: 500;
+  }
+
+  .error-message.visible {
+    display: flex;
+  }
+
+  .attempts-counter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .attempt-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    transition: var(--transition);
+  }
+
+  .attempt-dot.used {
+    background: var(--neon-red);
+    box-shadow: 0 0 8px rgba(255,0,68,0.5);
+  }
+
+  .auth-btn {
+    width: 100%;
+    height: 52px;
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .auth-btn-primary {
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(0,240,255,0.25);
+    margin-top: 8px;
+  }
+
+  .auth-btn-primary:active {
+    transform: scale(0.97);
+    box-shadow: 0 2px 10px rgba(0,240,255,0.2);
+  }
+
+  .auth-btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+    opacity: 0;
+    transition: var(--transition);
+  }
+
+  .auth-btn-primary:active::after {
+    opacity: 1;
+  }
+
+  .auth-switch {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-align: center;
+  }
+
+  .auth-switch a {
+    color: var(--neon-cyan);
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .auth-switch a:active {
+    opacity: 0.7;
+  }
+
+  /* ===== MAIN APP ===== */
+  #appScreen {
+    background: var(--bg-primary);
+  }
+
+  .app-header {
+    padding: 16px 20px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(10,10,15,0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 10;
+    min-height: 60px;
+  }
+
+  .app-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .app-header-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 0 15px rgba(0,240,255,0.2);
+  }
+
+  .app-header-title {
+    font-size: 18px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .app-header-right {
+    display: flex;
+    gap: 4px;
+  }
+
+  .header-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 18px;
+  }
+
+  .header-btn:active {
+    background: var(--bg-card-hover);
+    color: var(--text-primary);
+    transform: scale(0.92);
+  }
+
+  .header-btn.danger:active {
+    color: var(--neon-red);
+    border-color: rgba(255,0,68,0.3);
+  }
+
+  /* Search Bar */
+  .search-container {
+    padding: 12px 20px;
+    background: rgba(10,10,15,0.9);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .search-bar {
+    width: 100%;
+    height: 44px;
+    background: var(--bg-tertiary);
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0 16px 0 42px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--text-primary);
+    outline: none;
+    transition: var(--transition);
+  }
+
+  .search-bar:focus {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 0 3px rgba(0,240,255,0.08);
+  }
+
+  .search-bar::placeholder {
+    color: var(--text-muted);
+  }
+
+  .search-wrapper {
+    position: relative;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 16px;
+    pointer-events: none;
+  }
+
+  /* Notes List */
+  .notes-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 20px 100px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .notes-list::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .notes-list::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .notes-list::-webkit-scrollbar-thumb {
+    background: var(--text-muted);
+    border-radius: 4px;
+  }
+
+  .notes-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 60%;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .notes-empty-icon {
+    font-size: 64px;
+    opacity: 0.3;
+  }
+
+  .notes-empty-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  .notes-empty-text {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .note-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .note-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--neon-cyan), var(--neon-purple));
+    opacity: 0;
+    transition: var(--transition);
+  }
+
+  .note-card:active {
+    background: var(--bg-card-hover);
+    transform: scale(0.98);
+  }
+
+  .note-card:active::before {
+    opacity: 1;
+  }
+
+  .note-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .note-card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.3;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .note-card-date {
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .note-card-preview {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .note-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .note-card-chars {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .note-card-actions {
+    display: flex;
+    gap: 4px;
+  }
+
+  .note-action-btn {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 14px;
+  }
+
+  .note-action-btn:active {
+    background: var(--bg-card-hover);
+  }
+
+  .note-action-btn.delete:active {
+    color: var(--neon-red);
+  }
+
+  .note-action-btn.pin:active {
+    color: var(--neon-yellow);
+  }
+
+  .note-card.pinned {
+    border-color: rgba(255,230,0,0.15);
+  }
+
+  .note-card.pinned::before {
+    background: linear-gradient(180deg, var(--neon-yellow), var(--neon-green));
+    opacity: 1;
+  }
+
+  /* FAB */
+  .fab {
+    position: fixed;
+    bottom: 28px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+    border: none;
+    color: #fff;
+    font-size: 28px;
+    cursor: pointer;
+    box-shadow:
+      0 4px 20px rgba(0,240,255,0.3),
+      0 0 40px rgba(0,240,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    z-index: 20;
+  }
+
+  .fab:active {
+    transform: scale(0.9) rotate(90deg);
+  }
+
+  /* ===== EDITOR SCREEN ===== */
+  #editorScreen {
+    background: var(--bg-primary);
+    z-index: 50;
+  }
+
+  .editor-header {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(10,10,15,0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    min-height: 56px;
+  }
+
+  .editor-header-left,
+  .editor-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .editor-btn {
+    height: 38px;
+    padding: 0 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    gap: 6px;
+  }
+
+  .editor-btn:active {
+    background: var(--bg-card-hover);
+    transform: scale(0.95);
+  }
+
+  .editor-btn.save {
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+    color: #fff;
+    border: none;
+    box-shadow: 0 2px 12px rgba(0,240,255,0.2);
+  }
+
+  .editor-btn.save:active {
+    box-shadow: 0 1px 6px rgba(0,240,255,0.15);
+  }
+
+  .editor-btn.danger {
+    color: var(--neon-red);
+    border-color: rgba(255,0,68,0.2);
+  }
+
+  .editor-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 20px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .editor-title-input {
+    width: 100%;
+    background: none;
+    border: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    outline: none;
+    padding: 0;
+    margin-bottom: 4px;
+  }
+
+  .editor-title-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .editor-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .editor-meta-item {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .editor-content {
+    flex: 1;
+    width: 100%;
+    background: none;
+    border: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--text-primary);
+    outline: none;
+    resize: none;
+    min-height: 300px;
+  }
+
+  .editor-content::placeholder {
+    color: var(--text-muted);
+  }
+
+  .editor-footer {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border-color);
+    background: rgba(10,10,15,0.95);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ===== MODAL / CONFIRM ===== */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 100;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .modal-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .modal-content {
+    width: 100%;
+    max-width: 400px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    padding: 24px 20px 32px;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .modal-overlay.active .modal-content {
+    transform: translateY(0);
+  }
+
+  .modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .modal-text {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  .modal-buttons {
+    display: flex;
+    gap: 10px;
+  }
+
+  .modal-btn {
+    flex: 1;
+    height: 48px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .modal-btn:active {
+    transform: scale(0.96);
+  }
+
+  .modal-btn.cancel {
+    background: var(--bg-card);
+    color: var(--text-secondary);
+  }
+
+  .modal-btn.confirm {
+    background: linear-gradient(135deg, var(--neon-red), #cc0033);
+    color: #fff;
+    border: none;
+    box-shadow: 0 2px 12px rgba(255,0,68,0.2);
+  }
+
+  .modal-btn.primary {
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+    color: #fff;
+    border: none;
+  }
+
+  /* ===== WIPE SCREEN ===== */
+  #wipeScreen {
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-primary);
+    padding: 24px;
+  }
+
+  .wipe-container {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .wipe-icon {
+    font-size: 72px;
+    animation: wipePulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes wipePulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 1; }
+  }
+
+  .wipe-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--neon-red);
+  }
+
+  .wipe-text {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 300px;
+  }
+
+  .wipe-progress {
+    width: 200px;
+    height: 4px;
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+
+  .wipe-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--neon-red), var(--neon-pink));
+    border-radius: 4px;
+    width: 0%;
+    transition: width 2s ease-in-out;
+  }
+
+  /* ===== TOAST ===== */
+  .toast-container {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+  }
+
+  .toast {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 12px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s ease;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .toast.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .toast.success {
+    border-color: rgba(0,255,136,0.2);
+  }
+
+  .toast.error {
+    border-color: rgba(255,0,68,0.2);
+  }
+
+  .toast.info {
+    border-color: rgba(0,240,255,0.2);
+  }
+
+  /* ===== SETTINGS MODAL ===== */
+  .settings-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .settings-item:last-child {
+    border-bottom: none;
+  }
+
+  .settings-item-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .settings-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .settings-item-text h4 {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .settings-item-text p {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--text-muted);
+    border-radius: 4px;
+  }
+
+  /* ===== SAFE MODE INDICATOR ===== */
+  .safe-indicator {
+    position: fixed;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: rgba(0,255,136,0.08);
+    border: 1px solid rgba(0,255,136,0.15);
+    border-radius: 20px;
+    font-size: 11px;
+    color: var(--neon-green);
+    font-weight: 600;
+    z-index: 15;
+    pointer-events: none;
+  }
+
+  .safe-indicator .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--neon-green);
+    animation: safePulse 2s ease-in-out infinite;
+  }
+
+  @keyframes safePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* ===== CONFIRM PIN / DELETE ===== */
+  .pin-indicator {
+    color: var(--neon-yellow);
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (min-width: 500px) {
+    .auth-card { max-width: 420px; }
+    .notes-list { max-width: 600px; margin: 0 auto; padding-left: 24px; padding-right: 24px; }
+  }
+
+  /* ===== ANIMATIONS ===== */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-in {
+    animation: fadeInUp 0.4s ease forwards;
+  }
+
+  .note-card:nth-child(1) { animation-delay: 0.05s; }
+  .note-card:nth-child(2) { animation-delay: 0.1s; }
+  .note-card:nth-child(3) { animation-delay: 0.15s; }
+  .note-card:nth-child(4) { animation-delay: 0.2s; }
+  .note-card:nth-child(5) { animation-delay: 0.25s; }
+</style>
+</head>
+<body>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ===== AUTH SCREEN ===== -->
+<div class="screen" id="authScreen">
+  <div class="auth-container">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">🔐</div>
+      <div class="auth-title">NeonVault</div>
+      <div class="auth-subtitle">Seu cofre de notas criptografado.<br>Totalmente offline e seguro.</div>
+    </div>
+
+    <div class="auth-card" id="authCard">
+      <div id="authForm">
+        <div class="input-group">
+          <label class="input-label" id="authLabel">Senha mestra</label>
+          <div class="input-wrapper">
+            <input type="password" class="input-field" id="authInput" placeholder="••••••••" autocomplete="off" inputmode="text">
+            <button class="input-toggle" id="authToggle" aria-label="Mostrar senha">👁</button>
+          </div>
+          <div class="error-message" id="authError">
+            <span>⚠</span>
+            <span id="authErrorText">Senha incorreta</span>
+          </div>
+          <div class="attempts-counter" id="attemptsCounter" style="display:none;">
+            <div class="attempt-dot" id="dot1"></div>
+            <div class="attempt-dot" id="dot2"></div>
+          </div>
+        </div>
+        <button class="auth-btn auth-btn-primary" id="authBtn">
+          <span>🔓</span>
+          <span id="authBtnText">Desbloquear</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="auth-switch" id="authSwitch">
+      <span id="authSwitchText">Primeiro uso?</span>
+      <a id="authSwitchLink">Criar senha mestra</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MAIN APP SCREEN ===== -->
+<div class="screen hidden" id="appScreen">
+  <div class="app-header">
+    <div class="app-header-left">
+      <div class="app-header-logo">🔐</div>
+      <div class="app-header-title">NeonVault</div>
+    </div>
+    <div class="app-header-right">
+      <button class="header-btn" id="btnSettings" title="Configurações">⚙️</button>
+      <button class="header-btn danger" id="btnLock" title="Bloquear">🔒</button>
+    </div>
+  </div>
+
+  <div class="search-container">
+    <div class="search-wrapper">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-bar" id="searchBar" placeholder="Buscar notas..." inputmode="search">
+    </div>
+  </div>
+
+  <div class="notes-list" id="notesList"></div>
+
+  <button class="fab" id="fabNew" title="Nova nota">＋</button>
+
+  <div class="safe-indicator">
+    <div class="dot"></div>
+    CRIPTOGRAFADO
+  </div>
+</div>
+
+<!-- ===== EDITOR SCREEN ===== -->
+<div class="screen hidden" id="editorScreen">
+  <div class="editor-header">
+    <div class="editor-header-left">
+      <button class="editor-btn" id="btnBack">← Voltar</button>
+    </div>
+    <div class="editor-header-right">
+      <button class="editor-btn danger" id="btnDelete">🗑</button>
+      <button class="editor-btn save" id="btnSave">💾 Salvar</button>
+    </div>
+  </div>
+  <div class="editor-body">
+    <input type="text" class="editor-title-input" id="editorTitle" placeholder="Título da nota..." maxlength="120">
+    <div class="editor-meta">
+      <span class="editor-meta-item" id="editorDate">📅 --</span>
+      <span class="editor-meta-item" id="editorChars">📝 0 caracteres</span>
+    </div>
+    <textarea class="editor-content" id="editorContent" placeholder="Escreva sua nota aqui..." inputmode="text"></textarea>
+  </div>
+  <div class="editor-footer">
+    <span id="editorWords">0 palavras</span>
+    <span id="editorSavedStatus">Não salvo</span>
+  </div>
+</div>
+
+<!-- ===== WIPE SCREEN ===== -->
+<div class="screen hidden" id="wipeScreen">
+  <div class="wipe-container">
+    <div class="wipe-icon">🛡️</div>
+    <div class="wipe-title">Dados Destruídos</div>
+    <div class="wipe-text">Muitas tentativas incorretas. Todos os dados foram criptograficamente apagados para sua segurança.</div>
+    <div class="wipe-progress">
+      <div class="wipe-progress-bar" id="wipeBar"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL ===== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-content" id="modalContent"></div>
+</div>
+
+<script>
+// ============================================================
+// NeonVault — Secure Offline Notepad
+// ============================================================
+// Security: AES-256-GCM + PBKDF2 (100k iterations, random salt)
+// Anti-forensic: Zero plaintext storage, memory wipe, localStorage overwrite
+// ============================================================
+
+(function() {
+  'use strict';
+
+  // ===== SECURITY CONSTANTS =====
+  const PBKDF2_ITERATIONS = 100000;
+  const SALT_BYTES = 16;
+  const IV_BYTES = 12;
+  const KEY_LENGTH = 256;
+  const MAX_ATTEMPTS = 2;
+  const STORAGE_KEY_DATA = 'nv_data';
+  const STORAGE_KEY_SALT = 'nv_salt';
+  const STORAGE_KEY_ATTEMPTS = 'nv_attempts';
+  const STORAGE_KEY_SETUP = 'nv_setup';
+  const SESSION_TIMEOUT = 5 * 60 * 1000; // 5 min
+
+  // ===== STATE =====
+  let cryptoKey = null;
+  let notes = [];
+  let currentNoteId = null;
+  let sessionTimer = null;
+  let isSetup = false;
+
+  // ===== DOM REFS =====
+  const $ = id => document.getElementById(id);
+
+  const authScreen = $('authScreen');
+  const appScreen = $('appScreen');
+  const editorScreen = $('editorScreen');
+  const wipeScreen = $('wipeScreen');
+  const authInput = $('authInput');
+  const authBtn = $('authBtn');
+  const authToggle = $('authToggle');
+  const authLabel = $('authLabel');
+  const authBtnText = $('authBtnText');
+  const authError = $('authError');
+  const authErrorText = $('authErrorText');
+  const authSwitchText = $('authSwitchText');
+  const authSwitchLink = $('authSwitchLink');
+  const attemptsCounter = $('attemptsCounter');
+  const notesList = $('notesList');
+  const searchBar = $('searchBar');
+  const fabNew = $('fabNew');
+  const btnLock = $('btnLock');
+  const btnSettings = $('btnSettings');
+  const btnBack = $('btnBack');
+  const btnSave = $('btnSave');
+  const btnDelete = $('btnDelete');
+  const editorTitle = $('editorTitle');
+  const editorContent = $('editorContent');
+  const editorDate = $('editorDate');
+  const editorChars = $('editorChars');
+  const editorWords = $('editorWords');
+  const editorSavedStatus = $('editorSavedStatus');
+  const modalOverlay = $('modalOverlay');
+  const modalContent = $('modalContent');
+  const wipeBar = $('wipeBar');
+
+  // ===== CRYPTO HELPERS =====
+
+  function arrayBufferToBase64(buf) {
+    return btoa(String.fromCharCode(...new Uint8Array(buf)));
+  }
+
+  function base64ToArrayBuffer(b64) {
+    const bin = atob(b64);
+    const arr = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    return arr.buffer;
+  }
+
+  async function deriveKey(password, salt) {
+    const enc = new TextEncoder();
+    const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt, iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' },
+      keyMaterial,
+      { name: 'AES-GCM', length: KEY_LENGTH },
+      false,
+      ['encrypt', 'decrypt']
+    );
+  }
+
+  async function encryptData(plaintext) {
+    const iv = crypto.getRandomValues(new Uint8Array(IV_BYTES));
+    const enc = new TextEncoder();
+    const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, enc.encode(plaintext));
+    return {
+      iv: arrayBufferToBase64(iv),
+      data: arrayBufferToBase64(cipher)
+    };
+  }
+
+  async function decryptData(encrypted) {
+    const iv = base64ToArrayBuffer(encrypted.iv);
+    const data = base64ToArrayBuffer(encrypted.data);
+    const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, cryptoKey, data);
+    return new TextDecoder().decode(plain);
+  }
+
+  // ===== STORAGE HELPERS =====
+
+  function saveToStorage(key, value) {
+    try { localStorage.setItem(key, value); } catch(e) {}
+  }
+
+  function loadFromStorage(key) {
+    try { return localStorage.getItem(key); } catch(e) { return null; }
+  }
+
+  function secureWipe() {
+    // Overwrite storage multiple times
+    const junk = crypto.getRandomValues(new Uint8Array(256));
+    const junkStr = arrayBufferToBase64(junk.buffer);
+
+    for (let i = 0; i < 5; i++) {
+      saveToStorage(STORAGE_KEY_DATA, junkStr + Math.random().toString(36));
+      saveToStorage(STORAGE_KEY_SALT, junkStr);
+    }
+
+    // Final removal
+    localStorage.removeItem(STORAGE_KEY_DATA);
+    localStorage.removeItem(STORAGE_KEY_SALT);
+    localStorage.removeItem(STORAGE_KEY_SETUP);
+    localStorage.removeItem(STORAGE_KEY_ATTEMPTS);
+
+    // Clear memory
+    cryptoKey = null;
+    notes = [];
+    currentNoteId = null;
+
+    // Show wipe screen
+    authScreen.classList.add('hidden');
+    appScreen.classList.add('hidden');
+    editorScreen.classList.add('hidden');
+    wipeScreen.classList.remove('hidden');
+
+    setTimeout(() => { wipeBar.style.width = '100%'; }, 100);
+
+    setTimeout(() => {
+      location.reload();
+    }, 3000);
+  }
+
+  // ===== AUTH =====
+
+  function getFailedAttempts() {
+    return parseInt(loadFromStorage(STORAGE_KEY_ATTEMPTS) || '0');
+  }
+
+  function incrementFailedAttempts() {
+    const count = getFailedAttempts() + 1;
+    saveToStorage(STORAGE_KEY_ATTEMPTS, count.toString());
+    if (count >= MAX_ATTEMPTS) {
+      secureWipe();
+      return true;
+    }
+    return false;
+  }
+
+  function resetFailedAttempts() {
+    localStorage.removeItem(STORAGE_KEY_ATTEMPTS);
+  }
+
+  async function handleAuth() {
+    const password = authInput.value;
+    if (!password) {
+      authInput.classList.add('error');
+      setTimeout(() => authInput.classList.remove('error'), 500);
+      return;
+    }
+
+    authBtn.disabled = true;
+    authBtnText.textContent = 'Verificando...';
+
+    try {
+      if (isSetup) {
+        // Login mode
+        const saltB64 = loadFromStorage(STORAGE_KEY_SALT);
+        if (!saltB64) throw new Error('No salt');
+
+        const salt = base64ToArrayBuffer(saltB64);
+        cryptoKey = await deriveKey(password, salt);
+
+        // Try to decrypt
+        const encryptedData = loadFromStorage(STORAGE_KEY_DATA);
+        if (!encryptedData) throw new Error('No data');
+
+        await decryptData(JSON.parse(encryptedData));
+
+        // Success
+        resetFailedAttempts();
+        authInput.classList.add('success');
+        setTimeout(() => showApp(), 400);
+
+      } else {
+        // Setup mode
+        const salt = crypto.getRandomValues(new Uint8Array(SALT_BYTES));
+        cryptoKey = await deriveKey(password, salt);
+
+        // Encrypt empty notes array
+        const encrypted = await encryptData(JSON.stringify([]));
+        saveToStorage(STORAGE_KEY_SALT, arrayBufferToBase64(salt));
+        saveToStorage(STORAGE_KEY_DATA, JSON.stringify(encrypted));
+        saveToStorage(STORAGE_KEY_SETUP, 'true');
+
+        resetFailedAttempts();
+        authInput.classList.add('success');
+        setTimeout(() => showApp(), 400);
+      }
+    } catch(e) {
+      authInput.classList.add('error');
+      authInput.value = '';
+      authLabel.textContent = 'Senha incorreta';
+
+      const wiped = incrementFailedAttempts();
+      if (!wiped) {
+        const attempts = getFailedAttempts();
+        authErrorText.textContent = `Senha incorreta. ${MAX_ATTEMPTS - attempts} tentativa(s) restante(s).`;
+        authError.classList.add('visible');
+        attemptsCounter.style.display = 'flex';
+
+        for (let i = 1; i <= MAX_ATTEMPTS; i++) {
+          $(`dot${i}`).classList.toggle('used', i <= attempts);
+        }
+      }
+
+      setTimeout(() => {
+        authInput.classList.remove('error');
+        authInput.classList.remove('success');
+        authBtn.disabled = false;
+        authBtnText.textContent = isSetup ? 'Desbloquear' : 'Criar e entrar';
+      }, 500);
+      return;
+    }
+
+    authBtn.disabled = false;
+    authBtnText.textContent = isSetup ? 'Desbloquear' : 'Criar e entrar';
+  }
+
+  function showApp() {
+    loadNotes();
+    authScreen.classList.add('hidden');
+    appScreen.classList.remove('hidden');
+    renderNotes();
+    startSessionTimer();
+    showToast('🔓 Cofre desbloqueado', 'success');
+  }
+
+  function lockApp() {
+    cryptoKey = null;
+    notes = [];
+    currentNoteId = null;
+    clearInterval(sessionTimer);
+    appScreen.classList.add('hidden');
+    editorScreen.classList.add('hidden');
+    authScreen.classList.remove('hidden');
+    authInput.value = '';
+    authInput.classList.remove('success', 'error');
+    authError.classList.remove('visible');
+    attemptsCounter.style.display = 'none';
+    $('dot1').classList.remove('used');
+    $('dot2').classList.remove('used');
+    showToast('🔒 Cofre bloqueado', 'info');
+  }
+
+  // ===== NOTES CRUD =====
+
+  async function loadNotes() {
+    try {
+      const encryptedData = loadFromStorage(STORAGE_KEY_DATA);
+      if (!encryptedData) { notes = []; return; }
+      const decrypted = await decryptData(JSON.parse(encryptedData));
+      notes = JSON.parse(decrypted);
+    } catch(e) {
+      notes = [];
+    }
+  }
+
+  async function saveNotes() {
+    const encrypted = await encryptData(JSON.stringify(notes));
+    saveToStorage(STORAGE_KEY_DATA, JSON.stringify(encrypted));
+  }
+
+  function generateId() {
+    return Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 9);
+  }
+
+  function formatDate(ts) {
+    const d = new Date(ts);
+    const day = d.getDate().toString().padStart(2,'0');
+    const month = (d.getMonth()+1).toString().padStart(2,'0');
+    const year = d.getFullYear();
+    const hours = d.getHours().toString().padStart(2,'0');
+    const mins = d.getMinutes().toString().padStart(2,'0');
+    return `${day}/${month}/${year} ${hours}:${mins}`;
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // ===== RENDER =====
+
+  function renderNotes(filter = '') {
+    const filtered = notes
+      .filter(n => {
+        if (!filter) return true;
+        const f = filter.toLowerCase();
+        return n.title.toLowerCase().includes(f) || n.content.toLowerCase().includes(f);
+      })
+      .sort((a, b) => {
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
+        return b.updatedAt - a.updatedAt;
+      });
+
+    if (filtered.length === 0) {
+      notesList.innerHTML = `
+        <div class="notes-empty">
+          <div class="notes-empty-icon">📝</div>
+          <div class="notes-empty-title">${filter ? 'Nenhuma nota encontrada' : 'Nenhuma nota ainda'}</div>
+          <div class="notes-empty-text">${filter ? 'Tente buscar com outros termos.' : 'Toque no + para criar sua primeira nota segura.'}</div>
+        </div>
+      `;
+      return;
+    }
+
+    notesList.innerHTML = filtered.map(note => `
+      <div class="note-card animate-in ${note.pinned ? 'pinned' : ''}" data-id="${note.id}">
+        <div class="note-card-header">
+          <div class="note-card-title">${escapeHtml(note.title || 'Sem título')}</div>
+          <div class="note-card-date">${formatDate(note.updatedAt)}</div>
+        </div>
+        <div class="note-card-preview">${escapeHtml(note.content || 'Nota vazia...')}</div>
+        <div class="note-card-footer">
+          <span class="note-card-chars">${note.content.length} chars</span>
+          <div class="note-card-actions">
+            <button class="note-action-btn pin ${note.pinned ? 'pin-indicator' : ''}" data-action="pin" data-id="${note.id}" title="${note.pinned ? 'Desafixar' : 'Fixar'}">${note.pinned ? '📌' : '📍'}</button>
+            <button class="note-action-btn delete" data-action="delete" data-id="${note.id}" title="Excluir">🗑</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ===== EDITOR =====
+
+  function openEditor(noteId) {
+    if (noteId) {
+      const note = notes.find(n => n.id === noteId);
+      if (!note) return;
+      currentNoteId = noteId;
+      editorTitle.value = note.title;
+      editorContent.value = note.content;
+      editorDate.textContent = `📅 Criada em ${formatDate(note.createdAt)} • Editada em ${formatDate(note.updatedAt)}`;
+      editorSavedStatus.textContent = 'Salvo anteriormente';
+    } else {
+      currentNoteId = generateId();
+      editorTitle.value = '';
+      editorContent.value = '';
+      editorDate.textContent = `📅 ${formatDate(Date.now())}`;
+      editorSavedStatus.textContent = 'Nova nota';
+    }
+    updateEditorStats();
+    appScreen.classList.add('hidden');
+    editorScreen.classList.remove('hidden');
+    editorTitle.focus();
+  }
+
+  function closeEditor() {
+    editorScreen.classList.add('hidden');
+    appScreen.classList.remove('hidden');
+    currentNoteId = null;
+    renderNotes(searchBar.value);
+  }
+
+  async function saveCurrentNote() {
+    const title = editorTitle.value.trim();
+    const content = editorContent.value;
+
+    if (!title && !content.trim()) {
+      showToast('⚠️ Nota vazia não será salva', 'error');
+      return;
+    }
+
+    const now = Date.now();
+    const existingIdx = notes.findIndex(n => n.id === currentNoteId);
+
+    if (existingIdx >= 0) {
+      notes[existingIdx].title = title;
+      notes[existingIdx].content = content;
+      notes[existingIdx].updatedAt = now;
+    } else {
+      notes.push({
+        id: currentNoteId,
+        title,
+        content,
+        createdAt: now,
+        updatedAt: now,
+        pinned: false
+      });
+    }
+
+    await saveNotes();
+    editorSavedStatus.textContent = `Salvo em ${formatDate(now)}`;
+    showToast('💾 Nota salva com sucesso', 'success');
+  }
+
+  async function deleteNote(noteId) {
+    const note = notes.find(n => n.id === noteId);
+    if (!note) return;
+
+    showModal(
+      '🗑 Excluir Nota',
+      `Deseja excluir "<strong>${escapeHtml(note.title || 'Sem título')}</strong>"?<br><br>Esta ação é irreversível.`,
+      [
+        { text: 'Cancelar', cls: 'cancel', action: closeModal },
+        { text: 'Excluir', cls: 'confirm', action: async () => {
+          notes = notes.filter(n => n.id !== noteId);
+          await saveNotes();
+          renderNotes(searchBar.value);
+          closeModal();
+          showToast('🗑 Nota excluída', 'info');
+        }}
+      ]
+    );
+  }
+
+  async function togglePin(noteId) {
+    const note = notes.find(n => n.id === noteId);
+    if (!note) return;
+    note.pinned = !note.pinned;
+    await saveNotes();
+    renderNotes(searchBar.value);
+    showToast(note.pinned ? '📌 Nota fixada' : '📍 Nota desafixada', 'info');
+  }
+
+  function updateEditorStats() {
+    const text = editorContent.value;
+    editorChars.textContent = `📝 ${text.length} caracteres`;
+    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+    editorWords.textContent = `${words} palavras`;
+  }
+
+  // ===== MODAL =====
+
+  function showModal(title, text, buttons) {
+    modalContent.innerHTML = `
+      <div class="modal-title">${title}</div>
+      <div class="modal-text">${text}</div>
+      <div class="modal-buttons">
+        ${buttons.map((b, i) => `<button class="modal-btn ${b.cls}" data-idx="${i}">${b.text}</button>`).join('')}
+      </div>
+    `;
+
+    modalContent.querySelectorAll('.modal-btn').forEach((btn, i) => {
+      btn.addEventListener('click', () => buttons[i].action());
+    });
+
+    modalOverlay.classList.add('active');
+  }
+
+  function closeModal() {
+    modalOverlay.classList.remove('active');
+  }
+
+  // ===== TOAST =====
+
+  function showToast(message, type = 'info') {
+    const container = $('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    container.appendChild(toast);
+
+    requestAnimationFrame(() => {
+      toast.classList.add('visible');
+    });
+
+    setTimeout(() => {
+      toast.classList.remove('visible');
+      setTimeout(() => toast.remove(), 300);
+    }, 2500);
+  }
+
+  // ===== SESSION TIMER =====
+
+  function startSessionTimer() {
+    clearInterval(sessionTimer);
+    sessionTimer = setInterval(() => {
+      if (cryptoKey) {
+        lockApp();
+        showToast('🔒 Bloqueado por inatividade', 'info');
+      }
+    }, SESSION_TIMEOUT);
+
+    // Reset on activity
+    ['touchstart','keydown','click'].forEach(evt => {
+      document.addEventListener(evt, () => {
+        clearInterval(sessionTimer);
+        if (cryptoKey) startSessionTimer();
+      }, { once: false });
+    });
+  }
+
+  // ===== SETTINGS =====
+
+  function showSettings() {
+    showModal(
+      '⚙️ Configurações',
+      `
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-icon">🔐</div>
+            <div class="settings-item-text">
+              <h4>Criptografia</h4>
+              <p>AES-256-GCM + PBKDF2 (100k iterações)</p>
+            </div>
+          </div>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-icon">📊</div>
+            <div class="settings-item-text">
+              <h4>Notas armazenadas</h4>
+              <p>${notes.length} nota(s) no cofre</p>
+            </div>
+          </div>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-icon">🛡️</div>
+            <div class="settings-item-text">
+              <h4>Anti-forense</h4>
+              <p>Após ${MAX_ATTEMPTS} erros, dados são destruídos</p>
+            </div>
+          </div>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-icon">📵</div>
+            <div class="settings-item-text">
+              <h4>100% Offline</h4>
+              <p>Nenhum dado sai do dispositivo</p>
+            </div>
+          </div>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-icon">💣</div>
+            <div class="settings-item-text">
+              <h4>Destruir todos os dados</h4>
+              <p>Apaga tudo permanentemente</p>
+            </div>
+          </div>
+        </div>
+      `,
+      [
+        { text: 'Cancelar', cls: 'cancel', action: closeModal },
+        { text: 'Destruir tudo', cls: 'confirm', action: () => {
+          closeModal();
+          showModal(
+            '💣 Confirmar Destruição',
+            'Todos os dados serão sobrescritos e apagados permanentemente. Esta ação é <strong>irreversível</strong>.',
+            [
+              { text: 'Voltar', cls: 'cancel', action: closeModal },
+              { text: 'Destruir', cls: 'confirm', action: () => {
+                closeModal();
+                secureWipe();
+              }}
+            ]
+          );
+        }}
+      ]
+    );
+  }
+
+  // ===== EVENT LISTENERS =====
+
+  // Auth
+  authBtn.addEventListener('click', handleAuth);
+  authInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleAuth();
+  });
+  authToggle.addEventListener('click', () => {
+    const isPass = authInput.type === 'password';
+    authInput.type = isPass ? 'text' : 'password';
+    authToggle.textContent = isPass ? '🙈' : '👁';
+  });
+
+  authSwitchLink.addEventListener('click', () => {
+    isSetup = !isSetup;
+    authLabel.textContent = isSetup ? 'Senha mestra' : 'Nova senha mestra';
+    authBtnText.textContent = isSetup ? 'Desbloquear' : 'Criar e entrar';
+    authSwitchText.textContent = isSetup ? 'Primeiro uso?' : 'Já tem senha?';
+    authSwitchLink.textContent = isSetup ? 'Criar senha mestra' : 'Fazer login';
+    authError.classList.remove('visible');
+    authInput.value = '';
+    authInput.focus();
+  });
+
+  // App
+  btnLock.addEventListener('click', lockApp);
+  btnSettings.addEventListener('click', showSettings);
+  fabNew.addEventListener('click', () => openEditor(null));
+
+  searchBar.addEventListener('input', () => {
+    renderNotes(searchBar.value);
+  });
+
+  // Notes list delegation
+  notesList.addEventListener('click', e => {
+    const actionBtn = e.target.closest('[data-action]');
+    const card = e.target.closest('.note-card');
+
+    if (actionBtn) {
+      e.stopPropagation();
+      const id = actionBtn.dataset.id;
+      const action = actionBtn.dataset.action;
+      if (action === 'delete') deleteNote(id);
+      else if (action === 'pin') togglePin(id);
+      return;
+    }
+
+    if (card) {
+      openEditor(card.dataset.id);
+    }
+  });
+
+  // Editor
+  btnBack.addEventListener('click', closeEditor);
+  btnSave.addEventListener('click', saveCurrentNote);
+  btnDelete.addEventListener('click', () => {
+    if (currentNoteId && notes.find(n => n.id === currentNoteId)) {
+      deleteNote(currentNoteId);
+    } else {
+      closeEditor();
+    }
+  });
+
+  editorContent.addEventListener('input', () => {
+    updateEditorStats();
+    editorSavedStatus.textContent = 'Não salvo';
+  });
+
+  editorTitle.addEventListener('input', () => {
+    editorSavedStatus.textContent = 'Não salvo';
+  });
+
+  // Modal overlay click
+  modalOverlay.addEventListener('click', e => {
+    if (e.target === modalOverlay) closeModal();
+  });
+
+  // ===== INIT =====
+
+  function init() {
+    const setupFlag = loadFromStorage(STORAGE_KEY_SETUP);
+    isSetup = setupFlag === 'true';
+
+    if (!isSetup) {
+      authLabel.textContent = 'Nova senha mestra';
+      authBtnText.textContent = 'Criar e entrar';
+      authSwitchText.textContent = 'Já tem senha?';
+      authSwitchLink.textContent = 'Fazer login';
+    }
+
+    // Check failed attempts on load
+    const attempts = getFailedAttempts();
+    if (attempts > 0) {
+      attemptsCounter.style.display = 'flex';
+      for (let i = 1; i <= MAX_ATTEMPTS; i++) {
+        $(`dot${i}`).classList.toggle('used', i <= attempts);
+      }
+    }
+
+    authInput.focus();
+  }
+
+  init();
+
+})();
+</script>
+</body>
+</html>
